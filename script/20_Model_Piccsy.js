@@ -10,7 +10,8 @@ models.register({
 	},
 	
 	post : function(ps){
-	    var tag = joinText(ps.tags, ',');
+	    var tag = new String(encodeURI(joinText(ps.tags, ',')));
+		tag = tag.substr(0,94).replace(/%/,'');
         tag = joinText(tag.split(/\s*,\s*/),',');
         var nsfw = false;
         if(tag && tag.match(/adult|nude|private/,'i')) {
@@ -34,7 +35,7 @@ submit=Create+new+post
 		var vpublic	= nsfw ? '2' : '1';
 		var vnsfw	= nsfw ? 'on' : 'off';
 		var postcontent = {
-				title			:	ps.item,
+				title			:	(new String(encodeURI(ps.item))).substr(0,94),
 				description		:	ps.description,
 				src_url			:	ps.pageUrl,
 				image_link		:	ps.itemUrl,
