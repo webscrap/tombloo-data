@@ -8,28 +8,29 @@ models.register({
 	},
 	
 	post : function(ps){
+		models.pre_post(ps);
+		models.convert_to_link(ps);
 		var desc = ps.description;
-		if(ps.type == 'photo') {
-			if(ps.tags) {
-				ps.tags.push('imagelink');
-			}
-			else {
-				ps.tags = ['imagelink'];
-			}
-			if(!desc) {
-				desc = ps.pageUrl;
-			}
-		}
-		else if(ps.type == 'quote') {
-			if(ps.tags) {
-				ps.tags.push('quotelink');
-			}
-			else {
-				ps.tags = ['quotelink'];
-			}
-			desc =  ps.body || desc || ps.pageUrl;
-			alert(desc);
-		}
+		// if(ps.type == 'photo') {
+			// if(ps.tags) {
+				// ps.tags.push('imagelink');
+			// }
+			// else {
+				// ps.tags = ['imagelink'];
+			// }
+			// if(!desc) {
+				// desc = ps.pageUrl;
+			// }
+		// }
+		// else if(ps.type == 'quote') {
+			// if(ps.tags) {
+				// ps.tags.push('quotelink');
+			// }
+			// else {
+				// ps.tags = ['quotelink'];
+			// }
+			// desc =  ps.body || desc || ps.pageUrl;
+		// }
 		return succeed(this.addBookmark(ps.itemUrl, ps.item, ps.tags, desc));
 	},
 	

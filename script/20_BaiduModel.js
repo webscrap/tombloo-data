@@ -10,8 +10,10 @@ models.register({
 	},
 	
 	post : function(ps){
+		models.pre_post(ps);
+		models.convert_to_link(ps);
 	    var tag = joinText(ps.tags, ',');
-        tag = joinText(tag.split(/\s*,\s*/),',');
+        //tag = joinText(tag.split(/\s*,\s*/),',');
         var privacy = '0';
         if(tag && tag.match(/public/,'i')) {
             privacy = '1';

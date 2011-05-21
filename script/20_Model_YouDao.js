@@ -13,8 +13,9 @@ models.register({
 	POSTDATA=title=TITLE&url=http%3A%2F%2FURL&tags=TAG1%2CTAG2&note=DESC%0D%0ADESC
 	*/
 	post : function(ps){
+		models.pre_post(ps);
+		models.convert_to_link(ps);
 	    var tag = joinText(ps.tags, ',');
-        tag = joinText(tag.split(/\s*,\s*/),',');
         var privacy = '0';
         if(tag && tag.match(/public/,'i')) {
             privacy = '1';
