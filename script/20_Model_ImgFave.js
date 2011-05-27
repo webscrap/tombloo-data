@@ -10,12 +10,12 @@ models.register({
 	},
 	
 	post : function(ps){
-	    var tag = joinText(ps.tags, ',');
-        tag = joinText(tag.split(/\s*,\s*/),',');
         var privacy = '0';
-        if(tag && tag.match(/adult|nude|private/,'i')) {
+		models.pre_post(ps);
+        if(ps.adult || ps.private) {
             privacy = '1';
         }
+		var tag = joinText(ps.tags, ',');
 		/*
         POSTDATA=
 		i=http%3A%2F%2Freubenmiller.typepad.com%2F.a%2F6a00d8341ca70953ef01538e18d247970b-500wi

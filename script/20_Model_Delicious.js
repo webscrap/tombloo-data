@@ -92,9 +92,9 @@ models.register({
 		return (/(photo|quote|link|conversation|video)/).test(ps.type) && !ps.file;
 	},
 	
-	post : function(ps){
-		models.pre_post(ps);
-		models.convert_to_link(ps);
+	post : function(oldps){
+		models.pre_post(oldps);
+		var ps = models.convert_to_link(oldps);
 	    //var tag = joinText(ps.tags, ',');
 		return request('http://www.delicious.com/post/', {
 			queryString :	{
@@ -114,7 +114,7 @@ models.register({
 					jump        : 'no',
 					notes       : ps.description, //joinText([ps.body, ps.description], ' ', true),
 					tags        : joinText(ps.tags, ' '),
-					share       : ps.private? 'no' : '',
+					share       : ((ps.adult || ps.private )? 'no' : ''),
 				}),
 			});
 		});

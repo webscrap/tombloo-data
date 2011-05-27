@@ -12,7 +12,7 @@ var Clipp = {
 	post: function(ps) {
 		var endpoint = this.CLIPP_URL + 'bookmarklet/add';
 		var self = this;
-
+		models.pre_post(ps);
 		return self.postForm(function() {
 			return self.getForm(endpoint).addCallback(function(form) {
 				update(form, self[ps.type.capitalize()].convertToForm(ps));

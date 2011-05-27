@@ -8,6 +8,13 @@ models.register({
 	},
 	
 	post : function(ps){
+		models.pre_post(ps);
+		if(ps.adult) {
+			return fail(new Error('Adult content ignored.\n'));
+		}
+		if(ps.private) {
+			return fail(new Error('Private content ignored.\n'));
+		}
 		if(!this.getAuthCookie())
 			return fail(new Error(getMessage('error.notLoggedin')));
 		

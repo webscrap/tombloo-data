@@ -14,12 +14,13 @@ models.register({
 	},
 	
 	post : function(ps){
+		models.pre_post(ps);
 	    var tag = joinText(ps.tags, ',');
         tag = joinText(tag.split(/\s*,\s*/),',');
         var privacy = 'false';
         var sync = '0,2,3,1';
         var category = '';
-        if(tag && tag.match(/(private|adult|x.+)/,'i')) {
+        if(ps.adult || ps.private) {
             privacy = 'true';
             sync = '';
         }

@@ -11,9 +11,9 @@ models.register({
 	
 	post : function(ps){
 	    var tag = joinText(ps.tags, ',');
-        tag = joinText(tag.split(/\s*,\s*/),',');
         var nsfw = false;
-        if(tag && tag.match(/adult|nude|private/,'i')) {
+		models.pre_post(ps);
+        if(ps.adult || ps.private) {
             nsfw = true;
         }
 		/*

@@ -12,11 +12,11 @@ models.register({
 	post : function(ps){
 	    var tag = new String(encodeURI(joinText(ps.tags, ',')));
 		tag = tag.substr(0,94).replace(/%/,'');
-        tag = joinText(tag.split(/\s*,\s*/),',');
-        var nsfw = false;
-        if(tag && tag.match(/adult|nude|private/,'i')) {
+		var nsfw = false;
+		models.pre_post(ps);
+        if(ps.adult || ps.private) {
             nsfw = true;
-        }
+        }	
 		/*
 image_link=http%3A%2F%2Fcdnimg.visualizeus.com%2Fthumbs%2F51%2Fcb%2F51cb543efbe2fce7bc1b4839c0f4f176_m.jpg
 pop_tag_photography=on
