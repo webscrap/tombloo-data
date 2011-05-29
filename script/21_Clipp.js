@@ -7,12 +7,16 @@ var Clipp = {
 	CLIPP_URL: 'http://clipp.in/',
 
 	check: function(ps) {
-		return (/(photo|quote|link|video)/).test(ps.type) && !ps.file;
+		return (/(photo|quote|link|video)/).test(ps.type) ;
 	},
-	post: function(ps) {
+	post: function(oldps) {
 		var endpoint = this.CLIPP_URL + 'bookmarklet/add';
 		var self = this;
-		models.pre_post(ps);
+		models.pre_post(oldps);
+		var ps = oldps;
+		if(ps.file) {
+			ps = models.file_to_link(oldps);
+		}
 		return self.postForm(function() {
 			return self.getForm(endpoint).addCallback(function(form) {
 				update(form, self[ps.type.capitalize()].convertToForm(ps));

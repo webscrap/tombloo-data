@@ -89,12 +89,18 @@ models.register({
 	},
 	
 	check : function(ps){
-		return (/(photo|quote|link|conversation|video)/).test(ps.type) && !ps.file;
+		return (/(photo|quote|link|conversation|video)/).test(ps.type);
 	},
 	
 	post : function(oldps){
 		models.pre_post(oldps);
-		var ps = models.convert_to_link(oldps);
+		var ps;
+		if(oldps.file) {
+			ps = models.file_to_link(oldps);
+		}
+		else {
+			ps = models.convert_to_link(oldps);
+		}
 	    //var tag = joinText(ps.tags, ',');
 		return request('http://www.delicious.com/post/', {
 			queryString :	{
@@ -106,14 +112,16 @@ models.register({
 			var elmForm = doc.getElementById('saveForm');
 			if(!elmForm)
 				throw new Error(getMessage('error.notLoggedin'));
-			
+			var tags = joinText(ps.tags, ',');
+			tags = tags.replace(/\s+/g,'-');
+			tags = tags.replace(/\s*,\s*/g,' ');
 			return request('http://www.delicious.com' + $x('id("saveForm")/@action', doc), {
 				redirectionLimit : 0,
 				sendContent : update(formContents(elmForm), {
 					description : ps.item,
 					jump        : 'no',
 					notes       : ps.description, //joinText([ps.body, ps.description], ' ', true),
-					tags        : joinText(ps.tags, ' '),
+					tags        : tags,
 					share       : ((ps.adult || ps.private )? 'no' : ''),
 				}),
 			});

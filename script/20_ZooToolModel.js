@@ -27,7 +27,7 @@ models.register({
 	ICON : ' http://zootool.com/favicon.ico',
 	
 	check : function(ps){
-		return (/link|photo/).test(ps.type) && !ps.file;
+		return (/link|photo/).test(ps.type);
 	},
 	getInfo : function(ps){
 		return request('http://zootool.com/post/item/',{
@@ -51,8 +51,12 @@ models.register({
 			return r;
 		});
 	},
-	post : function(ps){
-		models.pre_post(ps);	
+	post : function(oldps){
+		models.pre_post(oldps);	
+		var ps = oldps;
+		if(ps.file) {
+			ps = models.file_to_link(oldps);
+		}
 	    var tag = joinText(ps.tags, ',');
         var ispublic = 'y';
         if(ps.adult || ps.private) {

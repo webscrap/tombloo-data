@@ -10,11 +10,15 @@ models.register({
 	ICON : 'http://www.ikeepu.com/favicon.ico',
 	
 	check : function(ps){
-		return (/(photo|link)/).test(ps.type) && !ps.file;
+		return (/(photo|link)/).test(ps.type);
 	},
 	
-	post : function(ps){
-		models.pre_post(ps);
+	post : function(oldps){
+		models.pre_post(oldps);
+		var ps = oldps;
+		if(ps.file) {
+			ps = models.file_to_link(oldps);
+		}
 	    var tag = joinText(ps.tags, ',');
         tag = joinText(tag.split(/\s*,\s*/),',');
         var privacy = 'false';
@@ -26,17 +30,17 @@ models.register({
         }
         if(ps.type == 'photo') {
             return request('http://ikeepu.com/command/BmItemAdd', {
-                referrer    : ps.pageUrl + '#' + ps.itemUrl,
+                referrer    : ps.pageUrl ,
                 queryString : {
-                    url         : ps.pageUrl,
+                    url         : ps.pageUrl + '#' + ps.itemUrl,
                     title       : ps.item,
                     tag         : tag,
                     privacy     : privacy,
                     sync        : sync,
                     category    : category,
                     description : ps.description || ps.itemUrl,
-                    type        : '1',
-                    body        : ps.itemUrl,
+                    type        : ps.gallery ? '0' : '1',
+                    body        : ps.gallery ? ps.pageUrl : ps.itemUrl,
                },
             });
         }

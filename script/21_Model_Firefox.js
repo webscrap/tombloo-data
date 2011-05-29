@@ -4,12 +4,18 @@ models.register({
 	ANNO_DESCRIPTION : 'bookmarkProperties/description',
 	
 	check : function(ps){
-		return (/(photo|quote|link)/).test(ps.type) && !ps.file;
+		return (/(photo|quote|link)/).test(ps.type);
 	},
 	
 	post : function(oldps){
 		models.pre_post(oldps);
-		var ps = models.convert_to_link(oldps);
+		var ps;
+		if(oldps.file) {
+			ps = models.file_to_link(oldps);
+		}
+		else {
+			ps = models.convert_to_link(oldps);
+		}
 		var desc = ps.description;
 		// if(ps.type == 'photo') {
 			// if(ps.tags) {

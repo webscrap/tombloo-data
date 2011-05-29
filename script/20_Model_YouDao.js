@@ -6,7 +6,7 @@ models.register({
 	ICON : 'http://shared.ydstatic.com/images/favicon.ico',
 	
 	check : function(ps){
-		return (/link|photo|text|quote/).test(ps.type) && !ps.file;
+		return (/link|photo|text|quote/).test(ps.type);
 	},
 	/*
 	URL=http://shuqian.youdao.com/manage?a=add
@@ -14,7 +14,13 @@ models.register({
 	*/
 	post : function(oldps){
 		models.pre_post(oldps);
-		var ps = models.convert_to_link(oldps);
+		var ps;
+		if(oldps.file) {
+			ps = models.file_to_link(oldps);
+		}
+		else {
+			ps = models.convert_to_link(oldps);
+		}
 	    var tag = joinText(ps.tags, ',');
         return request('http://shuqian.youdao.com/manage?a=add', {
             referrer    : ps.pageUrl,

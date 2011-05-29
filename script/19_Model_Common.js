@@ -5,7 +5,11 @@ function cloneObject(oldObj) {
   var newObj = (oldObj instanceof Array) ? [] : {};
   for (i in oldObj) {
     if (oldObj[i] && typeof oldObj[i] == "object") {
-		newObj[i] = cloneObject(oldObj[i]);
+		try {
+			newObj[i] = cloneObject(oldObj[i]);
+		}
+		catch(e) {
+		}
     } 
 	else {
 		newObj[i] = oldObj[i];
@@ -29,6 +33,9 @@ models.pre_post = function (ps) {
 		if(tag.match(/adult|X-/,'i')) {
 			ps.adult = true;
 		}
+		else {
+			ps.adult = false;
+		}
 		if(tag.match(/private|myself/,'i')) {
 			ps.private = true;
 		}
@@ -38,13 +45,32 @@ models.pre_post = function (ps) {
 		if(tag.match( ps.type + 'link')) {
 			ps.tagtype = true;
 		}
+		if(tag.match(/gallery|galleries|search|searching/),'i') {
+			ps.gallery = 1;
+		}
 	}
-	if(!(ps.type == 'link' || ps.tagtype)) {
-		ps.tags.push(ps.type + 'link');
+	if(!(ps.file || ps.type == 'link' || ps.tagtype)) {
+		if(!ps.tags) {
+			ps.tags = [ps.type + 'link'];
+		}
+		else {
+			ps.tags.push(ps.type + 'link');
+		}
 		ps.tagtype = true;
 	}
 	return ps;
 };
+
+models.file_to_link = function(ps) {
+	if(!ps.file) {
+		return ps;
+	}
+	var newps = models.copy_post(ps);
+	newps.type = 'link';
+	newps.itemUrl = ps.pageUrl;
+	return newps;
+};
+
 models.convert_to_link = function (ps) {
 	var newps = models.copy_post(ps);
 	if(ps.type == 'photo') {

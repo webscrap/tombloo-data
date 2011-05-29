@@ -6,12 +6,18 @@ models.register({
 	ICON : 'http://cang.baidu.com/favicon.ico',
 	
 	check : function(ps){
-		return (/link|photo|text|quote/).test(ps.type) && !ps.file;
+		return (/link|photo|text|quote/).test(ps.type);
 	},
 	
 	post : function(oldps){
 		models.pre_post(oldps);
-		var ps = models.convert_to_link(oldps);
+		var ps;
+		if(oldps.file) {
+			ps = models.file_to_link(oldps);
+		}
+		else {
+			ps = models.convert_to_link(oldps);
+		}
 	    var tag = joinText(ps.tags, ',');
         //tag = joinText(tag.split(/\s*,\s*/),',');
 		/*
