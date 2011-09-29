@@ -45,8 +45,38 @@ models.pre_post = function (ps) {
 		if(tag.match( ps.type + 'link')) {
 			ps.tagtype = true;
 		}
-		if(tag.match(/gallery|galleries|search|searching/),'i') {
+		if(tag.match(/gallery|galleries/,'i')) {
 			ps.gallery = 1;
+		}
+		else {
+			ps.gallery = 0;
+		}
+	}
+	if(ps.type == 'quote' && ps.pageUrl.match(/flickr\.com\/photos\//)) {
+		var source = new String(getFlavor(ps.body,'html'));
+		source += ps.description;
+		source = source.replace(/[\t\r\n]+/gm,'');
+		var m = source.match(/img\s+src=\"([^"]+)_[mz](\.[^\."]+)\"/);
+		if(m) {
+			var itemUrl = m[1] + m[2];
+			var pageUrl;
+			var page;
+			m = source.match(/page\s*\{([^{}]+)\}/);
+			if(m) {
+				pageUrl = m[1];
+				ps.type = 'photo';
+				ps.itemUrl = itemUrl;
+				ps.pageUrl = pageUrl;
+				ps.file = false;
+				m = source.match(/title\s*\{([^{}]+)\}/);
+				if(m) {
+					ps.item = m[1];
+				}
+				m = source.match(/src\s*\{([^{}]+)\}/);
+				if(m) {
+					ps.description = 'source:' +  m[1];
+				}
+			}		
 		}
 	}
 	if(!(ps.file || ps.type == 'link' || ps.tagtype)) {

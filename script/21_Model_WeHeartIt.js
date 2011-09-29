@@ -4,7 +4,7 @@ models.register({
 	URL  : 'http://weheartit.com/',
 	
 	check : function(ps){
-		return ps.type == 'photo' && !ps.file;
+		return ps.type.match(/photo|quote/)  && !ps.file;
 	},
 	
 	post : function(ps){

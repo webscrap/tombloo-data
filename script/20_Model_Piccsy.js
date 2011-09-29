@@ -6,7 +6,7 @@ models.register({
 	ICON : 'http://piccsy.com/favicon.ico',
 	
 	check : function(ps){
-		return (/photo/).test(ps.type) && !ps.file;
+		return (/photo|quote/).test(ps.type) && !ps.file;
 	},
 	
 	post : function(ps){

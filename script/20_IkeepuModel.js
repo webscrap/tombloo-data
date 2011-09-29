@@ -10,7 +10,7 @@ models.register({
 	ICON : 'http://www.ikeepu.com/favicon.ico',
 	
 	check : function(ps){
-		return (/(photo|link)/).test(ps.type);
+		return (/(photo|link|quote)/).test(ps.type);
 	},
 	
 	post : function(oldps){

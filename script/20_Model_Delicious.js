@@ -102,27 +102,41 @@ models.register({
 			ps = models.convert_to_link(oldps);
 		}
 	    //var tag = joinText(ps.tags, ',');
-		return request('http://www.delicious.com/post/', {
+//URL=http://www.delicious.com/save?url=http%3A%2F%2Fwww.delicious.com%2Fhelp%2Fapi%23posts_add&title=Delicious.com%20-%20Discover%20Yourself!&notes=&v=6&noui=1&jump=doclose
+		var actionUrl = 'https://secure.delicious.com/save';
+		return request(actionUrl, {
 			queryString :	{
 				title : ps.item,
 				url   : ps.itemUrl,
+				v	  : '6',
+				noui  : '1',
+				jump  : 'doclose'
 			},
 		}).addCallback(function(res){
+//			alert(res.responseText);
 			var doc = convertToHTMLDocument(res.responseText);
-			var elmForm = doc.getElementById('saveForm');
-			if(!elmForm)
+			var elmForm = doc;
+			if(!doc.getElementById('csrf_token')) 
 				throw new Error(getMessage('error.notLoggedin'));
 			var tags = joinText(ps.tags, ',');
 			tags = tags.replace(/\s+/g,'-');
-			tags = tags.replace(/\s*,\s*/g,' ');
-			return request('http://www.delicious.com' + $x('id("saveForm")/@action', doc), {
+//			tags = tags.replace(/\s*,\s*/g,' ');
+			//url=http%3A%2F%2Fwww.delicious.com%2Fhelp%2Fapi%23posts_add
+			//title=Delicious.com+-+Discover+Yourself!
+			//tags=test
+			//note=comments
+			//private=false
+			//stack_id=15045
+			//csrf_token=E2slq0tnoeZYxe3gVTqJ5k8quLMtShZCvgrujOkPNLPuzigthMtHfaTJUsiDGdcaWE28oVkgR6%2FhvABXHV0jbw%3D%3D
+			return request(actionUrl, {// + $x('id("saveForm")/@action', doc), {
+				'X-Requested-With' : 'XMLHttpRequest',
 				redirectionLimit : 0,
 				sendContent : update(formContents(elmForm), {
-					description : ps.item,
-					jump        : 'no',
-					notes       : ps.description, //joinText([ps.body, ps.description], ' ', true),
+					url		  :  ps.itemUrl,
+					title	   : ps.item,
+					note       : ps.description, 
 					tags        : tags,
-					share       : ((ps.adult || ps.private )? 'no' : ''),
+					'private'	: ((ps.adult || ps.private )? 'true' : 'false'),
 				}),
 			});
 		});

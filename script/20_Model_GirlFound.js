@@ -6,7 +6,7 @@ models.register({
 	ICON : 'http://www.girlfound.com/favicon.ico',
 	
 	check : function(ps){
-		return (ps.type == 'photo') && !ps.file;
+		return ps.type.match(/quote|photo/) && !ps.file;
 	},
 	/*
 	Referer=http://www.girlfound.com/post/?uri=http%3A%2F%2Fwww.zq.sd.cn%2Ftp%2Fnews%2F200807%2F2008-7-23_17474865213.jpg&title=%E7%99%BE%E5%BA%A6%E5%9B%BE%E7%89%87%E6%90%9C%E7%B4%A2_Vol.385%20Momoko%20Tani%20%E8%B0%B7%E6%A1%83%E5%AD%90&loc=http%3A%2F%2Fimage.baidu.com%2Fi%3Ftn%3Dbaiduimage%26ct%3D201326592%26lm%3D-1%26cl%3D2%26word%3DVol.385%2520Momoko%2520Tani%2520%25B9%25C8%25CC%25D2%25D7%25D3
