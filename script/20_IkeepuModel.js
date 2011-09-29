@@ -22,16 +22,18 @@ models.register({
 	    var tag = joinText(ps.tags, ',');
         tag = joinText(tag.split(/\s*,\s*/),',');
         var privacy = 'false';
-        var sync = '0,2,3,1';
+        var sync = 'sina,sohu';
         var category = '';
         if(ps.adult || ps.private) {
             privacy = 'true';
             sync = '';
         }
+		var actionUrl = 'http://ikeepu.com/me/keep';
         if(ps.type == 'photo') {
-            return request('http://ikeepu.com/command/BmItemAdd', {
+            return request(actionUrl, {
                 referrer    : ps.pageUrl ,
-                queryString : {
+                sendContent : update(ps,{
+					sid			: '',
                     url         : ps.pageUrl + '#' + ps.itemUrl,
                     title       : ps.item,
                     tag         : tag,
@@ -39,15 +41,16 @@ models.register({
                     sync        : sync,
                     category    : category,
                     description : ps.description || ps.itemUrl,
-                    type        : ps.gallery ? '0' : '1',
-                    body        : ps.gallery ? ps.pageUrl : ps.itemUrl,
-               },
+                    type        : ps.gallery ? 'page' : 'image',
+                    thumb       : ps.itemUrl,
+               }),
             });
         }
         else {
-            return request('http://ikeepu.com/command/BmItemAdd', {
+            return request(actionUrl, {
                 referrer    : ps.pageUrl,
-                queryString : {
+				sendContent : update(ps,{
+					sid			: '',
                     url         : ps.pageUrl,
                     title       : ps.item,
                     tag         : tag,
@@ -55,8 +58,8 @@ models.register({
                     sync        : sync,
                     category    : category,
                     description : ps.description || ps.pageUrl,
-                    type        : '0',
-               },
+                    type        : 'page',
+               }),
             });
         }
 	},
