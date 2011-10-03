@@ -19,13 +19,13 @@ function cloneObject(oldObj) {
 };
 
 models.preprocess = function(ModelName,fileLink,toLink) {
-	alert('1');
+//	alert('1');
 	var thismodel = models[ModelName];
 	if(thismodel) {
-		alert('2');
+//		alert('2');
 		thismodel.ori_post = thismodel.post;
 		thismodel.post = function(oldps) {
-			alert('3');
+//			alert('3');
     		models.pre_post(oldps);
     		var ps = oldps;
     		if(fileLink && ps.file) {
