@@ -18,6 +18,32 @@ function cloneObject(oldObj) {
   return newObj;
 };
 
+models.preprocess = function(ModelName,fileLink,toLink) {
+	alert('1');
+	var thismodel = models[ModelName];
+	if(thismodel) {
+		alert('2');
+		thismodel.ori_post = thismodel.post;
+		thismodel.post = function(oldps) {
+			alert('3');
+    		models.pre_post(oldps);
+    		var ps = oldps;
+    		if(fileLink && ps.file) {
+    			ps = models.file_to_link(oldps);
+    		}
+			else if(toLink) {
+				ps = models.convert_to_link(oldps);
+			}
+    		return thismodel.ori_post(ps);
+    	};
+	}
+	else {
+		alert('No model named ' + ModelName + ' for pre processing.');
+		return false;
+	}
+}
+
+
 models.copy_post = function (ps) {
 	var newps = cloneObject(ps);
 	newps.tags = ps.tags;
