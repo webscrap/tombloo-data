@@ -11,7 +11,7 @@
     		else {
     			ps = models.convert_to_link(oldps);
     		}
-    		var actionUrl = 'https://secure.delicious.com/save';
+    		var actionUrl = 'http://secure.delicious.com/save';
     		return request(actionUrl, {
     			queryString :	{
     				title : ps.item,

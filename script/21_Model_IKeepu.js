@@ -22,17 +22,18 @@ models.register({
 	    var tag = joinText(ps.tags, ',');
         tag = joinText(tag.split(/\s*,\s*/),',');
         var privacy = 'false';
-        var sync = 'sina,sohu';
+        var sync = 'sina';
         var category = '';
         if(ps.adult || ps.private) {
             privacy = 'true';
             sync = '';
         }
 		var actionUrl = 'http://ikeepu.com/me/keep';
+		ps = models.link_to_video(ps);
         if(ps.type == 'photo') {
             return request(actionUrl, {
                 referrer    : ps.pageUrl ,
-                sendContent : update(ps,{
+                sendContent : {
 					sid			: '',
                     url         : ps.pageUrl + '#' + ps.itemUrl,
                     title       : ps.item,
@@ -43,13 +44,46 @@ models.register({
                     description : ps.description || ps.itemUrl,
                     type        : ps.gallery ? 'page' : 'image',
                     thumb       : ps.itemUrl,
-               }),
+               },
             });
         }
+		else if (ps.type == 'video') {
+			var embed = ps.body;
+			var dom = convertToHTMLDocument(embed); 
+			embed = dom.getElementsByTagName('embed')[0];
+			//url=http://static.youku.com/v1.0.0188/v/swf/player.swf||VideoIDS=XMzAxMzQ0NTMy&ShowId=0&Cp=0&Light=on&THX=off&Tid=0&isAutoPlay=true&Version=/v1.0.0705&show_ce=1&winType=interior
+			var url = embed.getAttribute('src') + '||';
+			var attrs = new Array();
+			for(var i=0;i<embed.attributes.length;i++) {
+				var attr = embed.attributes[i];
+				if(attr.name.match(/src/)) {
+				}
+				else {
+					attrs.push(attr.name + '=' + attr.value);
+				}
+			}
+			url = url + attrs.join('&');
+            return request(actionUrl, {
+                referrer    : ps.pageUrl,
+				sendContent : {
+					sid			: '',
+                    url         : url,
+					referer		: ps.pageUrl,
+					thumb		: '',
+                    title       : ps.item,
+                    tag         : tag,
+                    privacy     : privacy,
+                    sync        : sync,
+                    category    : category,
+                    description : ps.description || ps.pageUrl,
+                    type        : 'video',
+               },
+            });
+		}
         else {
             return request(actionUrl, {
                 referrer    : ps.pageUrl,
-				sendContent : update(ps,{
+				sendContent : {
 					sid			: '',
                     url         : ps.pageUrl,
                     title       : ps.item,
@@ -59,7 +93,7 @@ models.register({
                     category    : category,
                     description : ps.description || ps.pageUrl,
                     type        : 'page',
-               }),
+               },
             });
         }
 	},

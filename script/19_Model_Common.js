@@ -18,7 +18,7 @@ function cloneObject(oldObj) {
   return newObj;
 };
 
-models.preprocess = function(ModelName,fileLink,toLink) {
+models.preprocess = function(ModelName,fileLink,toLink,toVideo) {
 //	alert('1');
 	var thismodel = models[ModelName];
 	if(thismodel) {
@@ -33,6 +33,10 @@ models.preprocess = function(ModelName,fileLink,toLink) {
     		}
 			else if(toLink) {
 				ps = models.convert_to_link(oldps);
+			}
+
+			if(toVideo) {
+				ps = models.link_to_video(ps);
 			}
     		return thismodel.ori_post(ps);
     	};
@@ -116,6 +120,20 @@ models.pre_post = function (ps) {
 	}
 	return ps;
 };
+
+models.link_to_video = function(ps) {
+	var newps = models.copy_post(ps);
+	if(newps.body && newps.body.match(/<embed|<object/)) {
+		newps.body = newps.body.replace(/(\<|\<\/)\s*object/g,'$1 object');
+		newps.type = 'video';
+	}
+	if(newps.description && newps.description.match(/<embed|<object/)) {
+		newps.body = ps.description.replace(/(\<|\<\/)\s*object/g,'$1 object');
+		newps.description = "";
+		newps.type = 'video';
+	}
+	return newps;
+}
 
 models.file_to_link = function(ps) {
 	if(!ps.file) {

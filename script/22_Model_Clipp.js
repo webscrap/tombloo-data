@@ -12,6 +12,7 @@
     		if(ps.file) {
     			ps = models.file_to_link(oldps);
     		}
+			models.link_to_video(ps);
     		return thismodel.ori_post(ps);
     	};
     }
