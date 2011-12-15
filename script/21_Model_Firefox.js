@@ -1,7 +1,8 @@
-models.preprocess('FirefoxBookmark',true,true);
+models.preprocess('FirefoxBookmark',true,true,true);
 if(models.FirefoxBookmark) {
 	var thismodel = models.FirefoxBookmark;
-	this.check = function(ps){
+	thismodel.check = function(ps){
+		return true;
 		return (/(photo|quote|link)/).test(ps.type);
 	};
 }

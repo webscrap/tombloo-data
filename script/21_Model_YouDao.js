@@ -6,7 +6,8 @@ models.register({
 	ICON : 'http://shared.ydstatic.com/images/favicon.ico',
 	
 	check : function(ps){
-		return (/link|photo|text|quote/).test(ps.type);
+		return true;
+		//return (/link|photo|text|quote|video|conversation/).test(ps.type);
 	},
 	/*
 	URL=http://shuqian.youdao.com/manage?a=add

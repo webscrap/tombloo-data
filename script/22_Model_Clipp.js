@@ -3,6 +3,7 @@
     	var thismodel = models.Clipp;
     	thismodel.ICON = 'http://clipp.in/favicon.ico';
     	thismodel.check =  function(ps) {
+			return true;
     		return (/(photo|quote|link|video)/).test(ps.type) ;
     	};
     	thismodel.ori_post = thismodel.post;
@@ -12,7 +13,10 @@
     		if(ps.file) {
     			ps = models.file_to_link(oldps);
     		}
-			models.link_to_video(ps);
+			ps = models.link_to_video(ps);
+			if(ps.type == 'photo') {
+				ps.pageUrl = ps.pageUrl + '#' + ps.itemUrl;
+			}
     		return thismodel.ori_post(ps);
     	};
     }

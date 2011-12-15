@@ -26,8 +26,8 @@ models.preprocess = function(ModelName,fileLink,toLink,toVideo) {
 		thismodel.ori_post = thismodel.post;
 		thismodel.post = function(oldps) {
 //			alert('3');
-    		models.pre_post(oldps);
-    		var ps = oldps;
+    		oldps = models.pre_post(oldps);
+			var ps = models.copy_post(oldps);
     		if(fileLink && ps.file) {
     			ps = models.file_to_link(oldps);
     		}
@@ -40,6 +40,22 @@ models.preprocess = function(ModelName,fileLink,toLink,toVideo) {
 			}
     		return thismodel.ori_post(ps);
     	};
+		thismodel.ori_check = thismodel.check;
+		thismodel.check = function(ps) {
+			if(thismodel.ori_check(ps)) {
+				return true;
+			}
+			if(fileLink && ps.file) {
+				return true;
+			}
+			else if(toLink && ps.type != 'video') {
+				return true;
+			}
+			if(toVideo && ps.type == 'video') {
+				return true;
+			}
+			return false;
+		};
 	}
 	else {
 		alert('No model named ' + ModelName + ' for pre processing.');
@@ -51,6 +67,8 @@ models.preprocess = function(ModelName,fileLink,toLink,toVideo) {
 models.copy_post = function (ps) {
 	var newps = cloneObject(ps);
 	newps.tags = ps.tags;
+	newps.file = ps.file;
+	newps.body = ps.body;
 	return newps;
 };
 		
@@ -124,11 +142,11 @@ models.pre_post = function (ps) {
 models.link_to_video = function(ps) {
 	var newps = models.copy_post(ps);
 	if(newps.body && newps.body.match(/<embed|<object/)) {
-		newps.body = newps.body.replace(/(\<|\<\/)\s*object/g,'$1 object');
+		newps.body = newps.body.replace(/(\<|\<\/)\s*object/g,'$1embed');
 		newps.type = 'video';
 	}
 	if(newps.description && newps.description.match(/<embed|<object/)) {
-		newps.body = ps.description.replace(/(\<|\<\/)\s*object/g,'$1 object');
+		newps.body = ps.description.replace(/(\<|\<\/)\s*object/g,'$1embed');
 		newps.description = "";
 		newps.type = 'video';
 	}

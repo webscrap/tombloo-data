@@ -6,6 +6,7 @@ models.register({
 	ICON : 'http://cang.baidu.com/favicon.ico',
 	
 	check : function(ps){
+		return true;
 		return (/link|photo|text|quote/).test(ps.type);
 	},
 	

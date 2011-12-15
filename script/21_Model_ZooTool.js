@@ -27,6 +27,7 @@ models.register({
 	ICON : ' http://zootool.com/favicon.ico',
 	
 	check : function(ps){
+		return true;
 		return (/link|photo|quote/).test(ps.type);
 	},
 	getInfo : function(ps){

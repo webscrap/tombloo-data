@@ -1,6 +1,10 @@
 (function() {
     var thismodel = models.Delicious;
     if(thismodel) {
+		thismodel.check = function(ps){
+			return true;
+			return (/link|photo|text|quote/).test(ps.type);
+		};
     	thismodel.ori_post = thismodel.post;
     	thismodel.post =  function(oldps){
     		models.pre_post(oldps);
