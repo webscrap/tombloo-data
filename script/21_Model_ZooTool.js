@@ -24,14 +24,14 @@ if(typeof(models)=='undefined')
     
 models.register({
 	name : 'Zootool',
-	ICON : ' http://zootool.com/favicon.ico',
+	ICON : ' https://zootool.com/favicon.ico',
 	
 	check : function(ps){
 		return true;
 		return (/link|photo|quote/).test(ps.type);
 	},
 	getInfo : function(ps){
-		return request('http://zootool.com/post/item/',{
+		return request('https://zootool.com/post/item/',{
 							referrer	:	ps.pageUrl,
 							queryString	:	{
 								iframe	:	'true',

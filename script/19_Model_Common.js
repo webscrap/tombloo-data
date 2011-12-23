@@ -127,6 +127,9 @@ models.pre_post = function (ps) {
 			}		
 		}
 	}
+	if(ps.type == 'photo' && !ps.description) {
+				ps.description = "Via " + ps.pageUrl;
+	}
 	if(!(ps.file || ps.type == 'link' || ps.tagtype)) {
 		if(!ps.tags) {
 			ps.tags = [ps.type + 'link'];
@@ -142,11 +145,11 @@ models.pre_post = function (ps) {
 models.link_to_video = function(ps) {
 	var newps = models.copy_post(ps);
 	if(newps.body && newps.body.match(/<embed|<object/)) {
-		newps.body = newps.body.replace(/(\<|\<\/)\s*object/g,'$1embed');
+		//newps.body = newps.body.replace(/(\<|\<\/)\s*object/g,'$1embed');
 		newps.type = 'video';
 	}
 	if(newps.description && newps.description.match(/<embed|<object/)) {
-		newps.body = ps.description.replace(/(\<|\<\/)\s*object/g,'$1embed');
+		newps.body = ps.description;//.replace(/(\<|\<\/)\s*object/g,'$1embed');
 		newps.description = "";
 		newps.type = 'video';
 	}
