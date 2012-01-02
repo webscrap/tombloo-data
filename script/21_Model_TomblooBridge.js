@@ -25,7 +25,7 @@ models.register({
 				'pageUrl=>' + ps.pageUrl,
 				'tags=>' + joinText(ps.tags,","),
 				'description=>' + (ps.description || ""),
-				'file=>'+ (ps.file || ""),
+				'file=>'+ (ps.file ? ps.file.path : ""),
 				'profd=>' + profd,
 				'body=>' + ps.body
 		];

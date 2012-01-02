@@ -1,4 +1,4 @@
-models.register({
+models["WeHeartIt"] = {
 	name : 'WeHeartIt',
 	ICON : 'http://weheartit.com/favicon.ico',
 	URL  : 'http://weheartit.com/',
@@ -65,4 +65,4 @@ models.register({
 		// クッキーの動作が不安定なため2つをチェックし真偽値を返す
 		return getCookieString('weheartit.com', 'auth') && getCookieString('weheartit.com', 'auth');
 	},
-});
+};

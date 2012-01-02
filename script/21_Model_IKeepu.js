@@ -13,7 +13,14 @@ models.register({
 		return true;
 		return (/(photo|link|quote)/).test(ps.type);
 	},
-	
+	request : function(url,data) {
+		return request(url,data).addCallback(function(res){
+			return 1;
+			if(res.responseText && res.responseText.indexOf('action="/login"')) {		
+				throw new Error(getMessage('error.notLoggedin'));
+			}
+		});
+	},
 	post : function(oldps){
 		models.pre_post(oldps);
 		var ps = oldps;
@@ -32,7 +39,7 @@ models.register({
 		var actionUrl = 'http://ikeepu.com/me/keep';
 		ps = models.link_to_video(ps);
         if(ps.type == 'photo') {
-            return request(actionUrl, {
+            return this.request(actionUrl, {
                 referrer    : ps.pageUrl ,
                 sendContent : {
 					sid			: '',
@@ -64,7 +71,7 @@ models.register({
 				}
 			}
 			url = url + attrs.join('&');
-            return request(actionUrl, {
+            return this.request(actionUrl, {
                 referrer    : ps.pageUrl,
 				sendContent : {
 					sid			: '',
@@ -82,7 +89,7 @@ models.register({
             });
 		}
         else {
-            return request(actionUrl, {
+            return this.request(actionUrl, {
                 referrer    : ps.pageUrl,
 				sendContent : {
 					sid			: '',
