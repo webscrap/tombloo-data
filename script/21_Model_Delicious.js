@@ -49,15 +49,28 @@ private=true
 csrf_token=2Vk6R%2B4hoHATKzTZOiGSKnBQ4OnIyiSeKL0zTyFQPzGYh6A3Q15ElzKqcUx7FSIPM3ihYMET03qATjtu%2F3UR1g%3D%3D
 */
 
+    			request(actionUrl, { 
+    				'X-Requested-With' : 'XMLHttpRequest',
+    				redirectionLimit : 0,
+    				sendContent : update(formContents(elmForm), {
+    					url	  : ps.pageUrl,
+					oldUrl	  : ps.pageUrl,
+    					title     : ps.item,
+    					note      : ps.itemUrl,
+    					tags      : tags,
+						no_image	: 'false',
+    					'private'	: ((ps.adult || ps.private )? 'true' : 'false'),
+    				}),
+    			});
     			return request(actionUrl, { 
     				'X-Requested-With' : 'XMLHttpRequest',
     				redirectionLimit : 0,
     				sendContent : update(formContents(elmForm), {
-    					url		  :  ps.itemUrl,
-						oldUrl	  : ps.itemUrl,
-    					title	   : ps.item,
-    					note       : ps.description, 
-    					tags        : tags,
+    					url	  :  ps.itemUrl,
+					oldUrl	  : ps.itemUrl,
+    					title     : ps.item,
+    					note      : ps.description, 
+    					tags      : tags,
 						no_image	: 'false',
     					'private'	: ((ps.adult || ps.private )? 'true' : 'false'),
     				}),
