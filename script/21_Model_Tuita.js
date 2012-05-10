@@ -27,6 +27,9 @@ models.register({
 		if(ps.file) {
 			ps = models.file_to_link(oldps);
 		}
+		if(ps.private || ps.adult) {
+			return 1;
+		}
 	    var tag = joinText(ps.tags, ',');
 
 /*
@@ -54,7 +57,7 @@ post_content=%7B%22body%22%3A%22%3CP%3E%3CBR%5C%2F%3E%3C%5C%2FP%3E%3CCENTER%3E%3
                 referrer    : 'http://www.tuita.com/myblog/afun/new/blog/?from=http%3A%2F%2Fwww.tuita.com%2Fmyblog%2Fafun',
 				'X-Requested-With' : 'XMLHttpRequest',
                 sendContent : {
-                    post_content : makebody('<P><BR/><IMG alt="" src="' + ps.itemUrl + '"/></P><P><BR/>Source: <A data-mce-href="' + ps.pageUrl + '" href="' + ps.pageUrl + '" title="' + (ps.description || ps.itemUrl) + '" target="_blank">' + ps.pageUrl + '</A><BR/></P>'),
+                    post_content : makebody('<P><BR/><IMG data-mce-src="' + ps.itemUrl + '" alt="" src="' + ps.itemUrl + '"/></P><P><BR/>Source: <A data-mce-href="' + ps.pageUrl + '" href="' + ps.pageUrl + '" title="' + (ps.description || ps.itemUrl) + '" target="_blank">' + ps.pageUrl + '</A><BR/></P>'),
                     post_title   : ps.item,
                     post_tag     : tag,
 					sync_flag	 : '0',
@@ -65,63 +68,7 @@ post_content=%7B%22body%22%3A%22%3CP%3E%3CBR%5C%2F%3E%3C%5C%2FP%3E%3CCENTER%3E%3
 					blog_id		: '1483648926',
                },
             });
-  /*      }
-		else if (ps.type == 'video') {
-			var embed = ps.body;
-			var dom = convertToHTMLDocument(embed); 
-			embed = dom.getElementsByTagName('embed')[0];
-			//url=http://static.youku.com/v1.0.0188/v/swf/player.swf||VideoIDS=XMzAxMzQ0NTMy&ShowId=0&Cp=0&Light=on&THX=off&Tid=0&isAutoPlay=true&Version=/v1.0.0705&show_ce=1&winType=interior
-			var url = embed.getAttribute('src') + '||';
-			var attrs = new Array();
-			for(var i=0;i<embed.attributes.length;i++) {
-				var attr = embed.attributes[i];
-				if(attr.name.match(/src/)) {
-				}
-				else {
-					attrs.push(attr.name + '=' + attr.value);
-				}
-			}
-			url = url + attrs.join('&');
-            return this.request(actionUrl, {
-                referrer    : ps.pageUrl,
-				sendContent : {
-					from		: 'BOOKMARK.1.0',
-					cod_hack	: unescape('%E2%84%A2'),
-					sid			: '0',
-                    url         : url,
-					referer		: ps.pageUrl,
-					thumb		: '',
-                    title       : ps.item,
-                    tag         : tag,
-                    privacy     : privacy,
-                    sync        : sync,
-                    category    : category,
-                    description : ps.description || ps.pageUrl,
-                    type        : 'video',
-               },
-            });
-		}
-        else {
-            return this.request(actionUrl, {
-                referrer    : ps.pageUrl,
-				sendContent : {
-					from		: 'BOOKMARK.1.0',
-					cod_hack	: unescape('%E2%84%A2'),
-					sid			: '0',
-                    url         : ps.pageUrl,
-                    title       : ps.item,
-                    tag         : tag,
-                    privacy     : privacy,
-                    sync        : sync,
-                    category    : category,
-					referer		: ps.pageUrl,
-					thumb		: '',
-                    description : ps.description || ps.pageUrl,
-                    type        : 'page',
-               },
-            });
-        }
-	*/
+//      }
 	},
 	
 });
