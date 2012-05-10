@@ -51,7 +51,7 @@ post_content=%7B%22body%22%3A%22%3CP%3E%3CBR%5C%2F%3E%3C%5C%2FP%3E%3CCENTER%3E%3
 		ps = models.link_to_video(ps);
 //        if(ps.type == 'photo') {
             return this.request(actionUrl, {
-                referrer    : 'http://www.tuita.com/myblog/keyduel/new/blog/?from=http%3A%2F%2Fwww.tuita.com%2Fmyblog%2Fkeyduel',
+                referrer    : 'http://www.tuita.com/myblog/afun/new/blog/?from=http%3A%2F%2Fwww.tuita.com%2Fmyblog%2Fafun',
 				'X-Requested-With' : 'XMLHttpRequest',
                 sendContent : {
                     post_content : makebody('<P><BR/><IMG alt="" src="' + ps.itemUrl + '"/></P><P><BR/>Source: <A data-mce-href="' + ps.pageUrl + '" href="' + ps.pageUrl + '" title="' + (ps.description || ps.itemUrl) + '" target="_blank">' + ps.pageUrl + '</A><BR/></P>'),
