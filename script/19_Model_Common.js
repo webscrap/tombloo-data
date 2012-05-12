@@ -80,7 +80,6 @@ models.pre_post = function (ps) {
 		}
 		if(tag.match(/adult|X-/,'i')) {
 			ps.adult = true;
-			ps.private = true;
 		}
 		else {
 			ps.adult = false;
