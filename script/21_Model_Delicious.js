@@ -18,6 +18,15 @@
     		else {
     			ps = models.convert_to_link(oldps);
     		}
+			if(ps.adult) {
+				ps.private = 'true';
+			}
+			if(ps.private) {
+				ps.private = 'true';
+			}
+			else {
+				ps.private = 'false';
+			}
 			return thismodel.ori_post(ps);
 			//URL=https://www.delicious.com/save?url=http%3A%2F%2Fzh.wikipedia.org%2Fwiki%2FCategory%3A%25E6%2597%25A5%25E6%259C%25ACAV%25E5%25A5%25B3%25E5%2584%25AA&title=Category%3A%E6%97%A5%E6%9C%ACAV%E5%A5%B3%E5%84%AA%20-%20%E7%BB%B4%E5%9F%BA%E7%99%BE%E7%A7%91%EF%BC%8C%E8%87%AA%E7%94%B1%E7%9A%84%E7%99%BE%E7%A7%91%E5%85%A8%E4%B9%A6&notes=&v=6&noui=1&jump=doclose
     		var actionUrl = 'https://secure.delicious.com/save';
