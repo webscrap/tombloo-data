@@ -78,7 +78,7 @@ models.pre_post = function (ps) {
 		if(tag.match(/,/)) {
 			ps.tags = tag.split(/\s*,\s*/);
 		}
-		if(tag.match(/adult|X-/,'i')) {
+		if(tag.match(/adult|X-|avcover|blowjob/,'i')) {
 			ps.adult = true;
 		}
 		else {
@@ -138,6 +138,9 @@ models.pre_post = function (ps) {
 			ps.tags.push(ps.type + 'link');
 		}
 		ps.tagtype = true;
+	}
+	if(ps.item) {
+		ps.item = ps.item.replace(/\s+-\s+[^-]+$/,'','g');
 	}
 	return ps;
 };
