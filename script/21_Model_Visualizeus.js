@@ -40,6 +40,7 @@ models.register({
 				submitted		:	'submitted',
 				status			:	status,
 				'nsfw'			:	vnsfw,
+				'public'		:	vpublic,
            },
         });
 	},

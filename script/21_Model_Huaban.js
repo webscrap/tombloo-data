@@ -87,14 +87,15 @@ is_share_btn=
 						'X-Requested-With' : 'XMLHttpRequest',
 		                sendContent : {
 							board_id	: data.id,
-							weibo		: 'false',
+							//weibo		: 'false',
 							via			: '1',
 							media_type	: '0',
 							video		: '0',
 							img_url		: ps.itemUrl,
 							link		: ps.pageUrl,
-							text		: ps.item,
+							text		: ps.item + "\n\n" + ps.description,
 							is_share_btn: '',
+							share_button:	'1024',
 						},
 					});
 				}

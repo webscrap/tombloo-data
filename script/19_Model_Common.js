@@ -78,8 +78,9 @@ models.pre_post = function (ps) {
 		if(tag.match(/,/)) {
 			ps.tags = tag.split(/\s*,\s*/);
 		}
-		if(tag.match(/adult|X-|avcover|blowjob/,'i')) {
+		if(tag.match(/adult|X-|avcover|blowjob|nude|tits|porn/,'i')) {
 			ps.adult = true;
+			ps.private = true;
 		}
 		else {
 			ps.adult = false;
@@ -122,13 +123,13 @@ models.pre_post = function (ps) {
 				}
 				m = source.match(/src\s*\{([^{}]+)\}/);
 				if(m) {
-					ps.description = 'source:' +  m[1];
+					ps.description = ':' +  m[1];
 				}
 			}		
 		}
 	}
 	if(ps.type == 'photo' && !ps.description) {
-				ps.description = "Via " + ps.pageUrl;
+				ps.description = ":" + ps.pageUrl+"";
 	}
 	if(!(ps.file || ps.type == 'link' || ps.tagtype)) {
 		if(!ps.tags) {
@@ -140,7 +141,7 @@ models.pre_post = function (ps) {
 		ps.tagtype = true;
 	}
 	if(ps.item) {
-		ps.item = ps.item.replace(/\s+-\s+[^-]+$/,'','g');
+		//ps.item = ps.item.replace(/\s+-\s+[^-]+$/,'','g');
 	}
 	return ps;
 };
@@ -177,7 +178,7 @@ models.convert_to_link = function (ps) {
 	}
 	else if(ps.type == 'quote' || ps.type == 'text') {
 		newps.itemUrl = ps.pageUrl;
-		newps.description = ps.description ? (ps.description + '\n' + ps.body) : ps.body;	
+		newps.description = ps.description ? (ps.description + '\n\n' + ps.body) : ps.body;	
 	}
 	return newps;
 };

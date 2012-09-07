@@ -124,6 +124,9 @@ models.register({
 				}
 			});
 		}
+		else if(ps.type == 'link') {
+			throw new Error(ps.type + ' is not supported.');
+		}
 		else {
 			throw new Error(ps.type + ' is not supported.');
 		}

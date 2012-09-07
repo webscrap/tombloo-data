@@ -1,5 +1,7 @@
-models.Tumblr.post = function(ps){
+models.Tumblr.post = function(oldps){
 		var self = this;
+		models.pre_post(oldps);
+		var ps = oldps;
 		var endpoint = Tumblr.TUMBLR_URL + 'new/' + ps.type;
 		return this.postForm(function(){
 			return self.getForm(endpoint).addCallback(function(form){
