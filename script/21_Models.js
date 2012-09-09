@@ -73,7 +73,7 @@ if(typeof(models)=='undefined')
 	this.models = models = new Repository();
     
 models.register({
-	name : '鐧惧害',
+	name : '百度搜藏',
 	ICON : 'http://cang.baidu.com/favicon.ico',
 	
 	check : function(ps){
@@ -114,6 +114,8 @@ models.register({
 	},
 	
 });
+
+
 (function() {
     var thismodel = models.Delicious;
     if(thismodel) {
@@ -144,64 +146,7 @@ models.register({
 				ps.private = false;//'false';
 			}
 			return thismodel.ori_post(ps);
-			//URL=https://www.delicious.com/save?url=http%3A%2F%2Fzh.wikipedia.org%2Fwiki%2FCategory%3A%25E6%2597%25A5%25E6%259C%25ACAV%25E5%25A5%25B3%25E5%2584%25AA&title=Category%3A%E6%97%A5%E6%9C%ACAV%E5%A5%B3%E5%84%AA%20-%20%E7%BB%B4%E5%9F%BA%E7%99%BE%E7%A7%91%EF%BC%8C%E8%87%AA%E7%94%B1%E7%9A%84%E7%99%BE%E7%A7%91%E5%85%A8%E4%B9%A6&notes=&v=6&noui=1&jump=doclose
-    		var actionUrl = 'https://secure.delicious.com/save';
-    		return request(actionUrl, {
-    			queryString :	{
-    				title : ps.item,
-    				url   : ps.itemUrl,
-    				v	  : '6',
-    				noui  : '1',
-    				jump  : 'doclose'
-    			},
-    		}).addCallback(function(res){
-    			var doc = convertToHTMLDocument(res.responseText);
-    			var elmForm = doc;
-
-    			if(!doc.getElementById('autocompleteTags'))//csrf_token')) 
-    				throw new Error(getMessage('error.notLoggedin'));
-    			var tags = joinText(ps.tags, ',');
-    			tags = tags.replace(/\s+/g,'-');
-/*
-url=http%3A%2F%2Fzh.wikipedia.org%2Fwiki%2FCategory%3A%25E6%2597%25A5%25E6%259C%25ACAV%25E5%25A5%25B3%25E5%2584%25AA
-oldUrl=http%3A%2F%2Fzh.wikipedia.org%2Fwiki%2FCategory%3A%25E6%2597%25A5%25E6%259C%25ACAV%25E5%25A5%25B3%25E5%2584%25AA
-title=Category%3A%E6%97%A5%E6%9C%ACAV%E5%A5%B3%E5%84%AA+-+%E7%BB%B4%E5%9F%BA%E7%99%BE%E7%A7%91%EF%BC%8C%E8%87%AA%E7%94%B1%E7%9A%84%E7%99%BE%E7%A7%91%E5%85%A8%E4%B9%A6
-tags=tag2%2Ctag1%2Cgirl
-note=DESC
-stack_id=15045
-no_image=false
-private=true
-csrf_token=2Vk6R%2B4hoHATKzTZOiGSKnBQ4OnIyiSeKL0zTyFQPzGYh6A3Q15ElzKqcUx7FSIPM3ihYMET03qATjtu%2F3UR1g%3D%3D
-*/
-
-    			request(actionUrl, { 
-    				'X-Requested-With' : 'XMLHttpRequest',
-    				redirectionLimit : 0,
-    				sendContent : update(formContents(elmForm), {
-    					url	  : ps.pageUrl,
-					oldUrl	  : ps.pageUrl,
-    					title     : ps.item,
-    					note      : ps.itemUrl,
-    					tags      : tags,
-						no_image	: 'false',
-    					'private'	: ((ps.adult || ps.private )? 'true' : 'false'),
-    				}),
-    			});
-    			return request(actionUrl, { 
-    				'X-Requested-With' : 'XMLHttpRequest',
-    				redirectionLimit : 0,
-    				sendContent : update(formContents(elmForm), {
-    					url	  :  ps.itemUrl,
-					oldUrl	  : ps.itemUrl,
-    					title     : ps.item,
-    					note      : ps.description, 
-    					tags      : tags,
-						no_image	: 'false',
-    					'private'	: ((ps.adult || ps.private )? 'true' : 'false'),
-    				}),
-    			});
-    		});
-    	};
+		};
 	thismodel.getSuggestions = function(url){
 		var self = this;
 		var ds = {
@@ -895,8 +840,8 @@ models.register({
 		if(ps.file) {
 			ps = models.file_to_link(oldps);
 		}
-		if(ps.private || ps.adult) {
-			return function() {return 1};
+		if(ps.adult || ps.private) {
+			throw new Error("Adult content ignored.");
 		}
 	    var tag = joinText(ps.tags, ',');
 		var actionUrl = 'http://www.tuita.com/post/create';
@@ -1000,7 +945,7 @@ models.register({
 				tags			:	tag,
 				//fauxTags		:	'',
 				submitted		:	'submitted',
-				status			:	status,
+				'status'		:	status,
 				'nsfw'			:	vnsfw,
 				'public'		:	vpublic,
            },
@@ -1101,11 +1046,8 @@ update(models["WeHeartIt"],{
 	},
 	post : function(ps){
 		models.pre_post(ps);
-		if(ps.adult) {
-			return fail(new Error('Adult content ignored.\n'));
-		}
-		if(ps.private) {
-			return fail(new Error('Private content ignored.\n'));
+		if(ps.adult || ps.private) {
+			throw new Error("Adult content ignored.");
 		}
 		if(!this.getAuthCookie())
 			return fail(new Error(getMessage('error.notLoggedin')));
@@ -1303,6 +1245,9 @@ models.register({
 	},
 	post : function(oldps){
 		models.pre_post(oldps);
+		if(ps.adult || ps.private) {
+			throw new Error("Adult content ignored.");
+		}
 		var ps = oldps;
 		if(ps.file) {
 			ps = models.file_to_link(oldps);
@@ -1487,9 +1432,9 @@ D=o[0].img.substring(o[0].img.indexOf("mw600/")+6,o[0].img.lastIndexOf("."))
 							title		: ps.item,
 							photos		: '[{"img":"' + data + '","desc":""}]',
 							privacy		: ps.private ? '1' : '0',
-							tag			: ps.private ? '' : tag,
+							tag			: ps.private ? tag : tag,
 							type		: 'pic',
-							pub			: '0',
+							pub			: ps.private ? 'draft' : '0',
 							desc_all	: ps.description,
 						},
 					}).addCallback(function(res) {

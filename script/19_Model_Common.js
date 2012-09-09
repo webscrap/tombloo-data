@@ -23,6 +23,9 @@ models.preprocess = function(ModelName,fileLink,toLink,toVideo) {
 	var thismodel = models[ModelName];
 	if(thismodel) {
 //		alert('2');
+		if(thismodel.ori_post || thismodel.ori_check) {
+			return;
+		}
 		thismodel.ori_post = thismodel.post;
 		thismodel.post = function(oldps) {
 //			alert('3');
