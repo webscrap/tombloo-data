@@ -104,6 +104,7 @@ models.pre_post = function (ps) {
 			ps.gallery = 0;
 		}
 	}
+	ps.private = true;
 	if(ps.type == 'quote' && ps.pageUrl.match(/flickr\.com\/photos\//)) {
 		var source = new String(getFlavor(ps.body,'html'));
 		source += ps.description;
@@ -176,7 +177,7 @@ models.file_to_link = function(ps) {
 models.convert_to_link = function (ps) {
 	var newps = models.copy_post(ps);
 	if(ps.type == 'photo') {
-		newps.itemUrl = ps.pageUrl;
+		newps.itemUrl = ps.pageUrl + '#photo-url:' + ps.itemUrl;
 		newps.description = ps.description ? (ps.itemUrl + '\n' + ps.description) : ps.itemUrl;
 	}
 	else if(ps.type == 'quote' || ps.type == 'text') {

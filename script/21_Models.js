@@ -414,13 +414,6 @@ models.register({
 			var r = res.responseText;
 			if(r) {
 				var id;
-			/*
-			//login:
-				if(r.indexOf("diandian.com/login")) {
-					log(r);
-					throw new Error(getMessage('error.notLoggedin'));
-				}
-			*/
 				var m = r.match(/"board_id"\s*:\s*(\d+)/);
 				if(m) {
 					id = m[1];
@@ -438,7 +431,7 @@ models.register({
 	post : function(oldps){
 		models.pre_post(oldps);
 		var ps = oldps;
-		if(ps.adult || ps.private) {
+		if(ps.adult) {
 			throw new Error("Adult content ignored.");
 		}
 		if(ps.file) {
@@ -840,7 +833,7 @@ models.register({
 		if(ps.file) {
 			ps = models.file_to_link(oldps);
 		}
-		if(ps.adult || ps.private) {
+		if(ps.adult) {
 			throw new Error("Adult content ignored.");
 		}
 	    var tag = joinText(ps.tags, ',');
@@ -920,7 +913,7 @@ models.register({
 	    var tag = joinText(ps.tags, ',');
         var nsfw = false;
 		models.pre_post(ps);
-        if(ps.adult || ps.private) {
+        if(ps.adult) {
             nsfw = true;
         }
 		var user = getCookieString('vi.sualize.us','VISUALIZEUS-login');
@@ -929,7 +922,7 @@ models.register({
 			user = user.replace(/^.*=/,'');
 		}
 		var dir = 'http://vi.sualize.us/' + user + '/'; //?action=add
-		var vpublic	= nsfw ? ''	: 'public';
+		var vpublic	= nsfw ? '' : (ps.private ? '' : 'public');
 		var vnsfw	= nsfw ? 'nsfw' : '';
 		var status	=	nsfw ? '2'	:	'0';
         return request(dir + '?action=add',  {
@@ -1040,13 +1033,13 @@ models.register({
 	
 });
 
-update(models["WeHeartIt"],{
+update(models.WeHeartIt,{
 	check : function(ps){
 		return ps.type.match(/photo|quote/)  && !ps.file;
 	},
 	post : function(ps){
 		models.pre_post(ps);
-		if(ps.adult || ps.private) {
+		if(ps.adult) {
 			throw new Error("Adult content ignored.");
 		}
 		if(!this.getAuthCookie())
@@ -1061,6 +1054,11 @@ update(models["WeHeartIt"],{
                 tags : joinText(ps.tags, ','),
 			},
         });
+	},
+	getAuthCookie : function(){
+        //return 1;
+		// ¥¯¥Ã¥­©`¤ÎÓ×÷¤¬²»°²¶¨¤Ê¤¿¤á2¤Ä¤ò¥Á¥§¥Ã¥¯¤·ÕæÎ¤ò·µ¤¹
+		return getCookieString('weheartit.com', 'auth');
 	},
 });
 
@@ -1189,7 +1187,6 @@ models.register({
 	},
 	upload : function(ps) {
 		var apiurl = 'http://pinterest.com/pin/create/bookmarklet/';
-		//media=http%3A%2F%2Fimg1.moko.cc%2Fusers%2F0%2F4%2F1409%2Fface%2Fimg1_src_5803249.jpg&url=http%3A%2F%2Fimg1.moko.cc%2Fusers%2F0%2F4%2F1409%2Fface%2Fimg1_src_5803249.jpg&title=img1_src_5803249.jpg%20(JPEG%20Image%2C%20957%C2%A0%C3%97%C2%A0700%20pixels)&is_video=false&description=http%3A%2F%2Fimg1.moko.cc%2Fusers%2F0%2F4%2F1409%2Fface%2Fimg1_src_5803249.jpg'http://www.diandian.com/share';///v2?tmp=' + (+new Date);
 		return request(apiurl, {
 				referrer	: ps.pageUrl || ps.itemUrl,
 				queryString : {
@@ -1207,13 +1204,6 @@ models.register({
 				var boardid;
 				var token;
 				var form_url;
-			/*
-			//login:
-				if(r.indexOf("diandian.com/login")) {
-					log(r);
-					throw new Error(getMessage('error.notLoggedin'));
-				}
-			*/
 				var m = r.match(/id="id_board"[^>]+value="(\d+)"/);
 				if(m) {
 					boardid = m[1];
@@ -1245,7 +1235,7 @@ models.register({
 	},
 	post : function(oldps){
 		models.pre_post(oldps);
-		if(ps.adult || ps.private) {
+		if(oldps.adult) {
 			throw new Error("Adult content ignored.");
 		}
 		var ps = oldps;
@@ -1421,6 +1411,7 @@ models.register({
 D=o[0].img.substring(o[0].img.indexOf("mw600/")+6,o[0].img.lastIndexOf("."))
 
 */
+				var tag_text = (ps.tags) ? "#" + joinText(ps.tags,"#, #") + "#" : '';
 				if(data) {
 					var pid=data.substring(data.indexOf("mw600\\\/")+7,data.lastIndexOf("."));
 					var actionUrl = 'http://qing.weibo.com//blog/api/picpost.php?from_type=capture';
@@ -1435,7 +1426,7 @@ D=o[0].img.substring(o[0].img.indexOf("mw600/")+6,o[0].img.lastIndexOf("."))
 							tag			: ps.private ? tag : tag,
 							type		: 'pic',
 							pub			: ps.private ? 'draft' : '0',
-							desc_all	: ps.description,
+							desc_all	: ps.description + " " + tag_text,
 						},
 					}).addCallback(function(res) {
 						var r = res.responseText;
@@ -1470,4 +1461,13 @@ if(models.Twitpic) {
 
 models.preprocess('Twitter',1,0,1);
 
+
+
+update(models.StumbleUpon, {
+	check	: function(ps) {
+		if(ps.type == 'photo' || ps.type == 'link') {
+			return true;
+		}
+	}
+});
 
