@@ -1,4 +1,5 @@
 if(typeof(models)=='undefined')
+
 	this.models = models = new Repository();
 
 function cloneObject(oldObj) {
@@ -104,7 +105,6 @@ models.pre_post = function (ps) {
 			ps.gallery = 0;
 		}
 	}
-	ps.private = true;
 	if(ps.type == 'quote' && ps.pageUrl.match(/flickr\.com\/photos\//)) {
 		var source = new String(getFlavor(ps.body,'html'));
 		source += ps.description;

@@ -434,6 +434,9 @@ models.register({
 		if(ps.adult) {
 			throw new Error("Adult content ignored.");
 		}
+		if(ps.private) {
+			throw new Error("Private content ignored.");
+		}
 		if(ps.file) {
 			ps = models.file_to_link(oldps);
 		}
@@ -742,7 +745,9 @@ models.register({
 				'description=>' + (ps.description || ""),
 				'file=>'+ (ps.file ? ps.file.path : ""),
 				'profd=>' + profd,
-				'body=>' + ps.body
+				'body=>' + ps.body,
+				'private=>' + (ps.private ? '1' : '0'),
+				'adult=>' + (ps.adult ? '1' : '0'),
 		];
 		var file = getTempFile('txt');	
 		putContents(file,joinText(args,"\n"),'UTF8');
@@ -835,6 +840,9 @@ models.register({
 		}
 		if(ps.adult) {
 			throw new Error("Adult content ignored.");
+		}
+		if(ps.private) {
+			throw new Error("Private content ignored.");
 		}
 	    var tag = joinText(ps.tags, ',');
 		var actionUrl = 'http://www.tuita.com/post/create';
@@ -1042,6 +1050,9 @@ update(models.WeHeartIt,{
 		if(ps.adult) {
 			throw new Error("Adult content ignored.");
 		}
+		if(ps.private) {
+			throw new Error("Private content ignored.");
+		}
 		if(!this.getAuthCookie())
 			return fail(new Error(getMessage('error.notLoggedin')));
 		return request(this.URL + 'create_entry/', {
@@ -1237,6 +1248,9 @@ models.register({
 		models.pre_post(oldps);
 		if(oldps.adult) {
 			throw new Error("Adult content ignored.");
+		}
+		if(oldps.private) {
+			throw new Error("Private content ignored.");
 		}
 		var ps = oldps;
 		if(ps.file) {
