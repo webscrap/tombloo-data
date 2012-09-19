@@ -1,6 +1,6 @@
 if(typeof(models)=='undefined')
 
-	this.models = models = new Repository();
+	models = new Repository();
 
 function cloneObject(oldObj) {
   var newObj = (oldObj instanceof Array) ? [] : {};
@@ -19,171 +19,217 @@ function cloneObject(oldObj) {
   return newObj;
 };
 
-models.preprocess = function(ModelName,fileLink,toLink,toVideo) {
-//	alert('1');
-	var thismodel = models[ModelName];
-	if(thismodel) {
-//		alert('2');
-		if(thismodel.ori_post || thismodel.ori_check) {
-			return;
-		}
-		thismodel.ori_post = thismodel.post;
-		thismodel.post = function(oldps) {
-//			alert('3');
-    		oldps = models.pre_post(oldps);
-			var ps = models.copy_post(oldps);
-    		if(fileLink && ps.file) {
-    			ps = models.file_to_link(oldps);
-    		}
-			else if(toLink) {
-				ps = models.convert_to_link(oldps);
+var modelExt = {
+	assertFalse : function(ps,property) {
+		for(name in property) {
+			if(typeof property[name] == 'boolean' && ps[name]) {
+				throw new Error(name + " post not supported, ignored.");
 			}
-
-			if(toVideo) {
-				ps = models.link_to_video(ps);
+			else if(ps[name] && ps[name].match(property[name])){
+				throw new Error(name + ' of Post match ' + property[name] + ', ignored.');
 			}
-    		return thismodel.ori_post(ps);
-    	};
-		thismodel.ori_check = thismodel.check;
-		thismodel.check = function(ps) {
-			if(thismodel.ori_check(ps)) {
-				return true;
-			}
-			if(fileLink && ps.file) {
-				return true;
-			}
-			else if(toLink && ps.type != 'video') {
-				return true;
-			}
-			if(toVideo && ps.type == 'video') {
-				return true;
-			}
-			return false;
-		};
-	}
-	else {
-		alert('No model named ' + ModelName + ' for pre processing.');
-		return false;
-	}
-}
-
-
-models.copy_post = function (ps) {
-	var newps = cloneObject(ps);
-	newps.tags = ps.tags;
-	newps.file = ps.file;
-	newps.body = ps.body;
-	return newps;
-};
-		
-models.pre_post = function (ps) {
-	var tag = joinText(ps.tags, ' ');
-	if(tag) {	
-		if(tag.match(/,/)) {
-			ps.tags = tag.split(/\s*,\s*/);
 		}
-		if(tag.match(/adult|X-|avcover|blowjob|nude|tits|porn/,'i')) {
-			ps.adult = true;
-			ps.private = true;
-		}
-		else {
-			ps.adult = false;
-		}
-		if(tag.match(/private|myself/,'i')) {
-			ps.private = true;
-		}
-		if(tag.match(/public/,'i')) {
-			ps.private = false;
-		}
-		if(tag.match( ps.type + 'link')) {
-			ps.tagtype = true;
-		}
-		if(tag.match(/gallery|galleries/,'i')) {
-			ps.gallery = 1;
-		}
-		else {
-			ps.gallery = 0;
-		}
-	}
-	if(ps.type == 'quote' && ps.pageUrl.match(/flickr\.com\/photos\//)) {
-		var source = new String(getFlavor(ps.body,'html'));
-		source += ps.description;
-		source = source.replace(/[\t\r\n]+/gm,'');
-		var m = source.match(/img\s+src=\"([^"]+)_[mz](\.[^\."]+)\"/);
-		if(m) {
-			var itemUrl = m[1] + m[2];
-			var pageUrl;
-			var page;
-			m = source.match(/page\s*\{([^{}]+)\}/);
-			if(m) {
-				pageUrl = m[1];
-				ps.type = 'photo';
-				ps.itemUrl = itemUrl;
-				ps.pageUrl = pageUrl;
-				ps.file = false;
-				m = source.match(/title\s*\{([^{}]+)\}/);
-				if(m) {
-					ps.item = m[1];
-				}
-				m = source.match(/src\s*\{([^{}]+)\}/);
-				if(m) {
-					ps.description = ':' +  m[1];
-				}
-			}		
-		}
-	}
-	if(ps.type == 'photo' && !ps.description) {
-				ps.description = ":" + ps.pageUrl+"";
-	}
-	if(!(ps.file || ps.type == 'link' || ps.tagtype)) {
-		if(!ps.tags) {
-			ps.tags = [ps.type + 'link'];
-		}
-		else {
-			ps.tags.push(ps.type + 'link');
-		}
-		ps.tagtype = true;
-	}
-	if(ps.item) {
-		//ps.item = ps.item.replace(/\s+-\s+[^-]+$/,'','g');
-	}
-	return ps;
-};
-
-models.link_to_video = function(ps) {
-	var newps = models.copy_post(ps);
-	if(newps.body && newps.body.match(/<embed|<object/)) {
-		//newps.body = newps.body.replace(/(\<|\<\/)\s*object/g,'$1embed');
-		newps.type = 'video';
-	}
-	if(newps.description && newps.description.match(/<embed|<object/)) {
-		newps.body = ps.description;//.replace(/(\<|\<\/)\s*object/g,'$1embed');
-		newps.description = "";
-		newps.type = 'video';
-	}
-	return newps;
-}
-
-models.file_to_link = function(ps) {
-	if(!ps.file) {
 		return ps;
-	}
-	var newps = models.copy_post(ps);
-	newps.type = 'link';
-	newps.itemUrl = ps.pageUrl;
-	return newps;
+	},
+	throwAdult : function(ps) {
+		return this.assertFalse(ps,{adult:true});
+	},
+	throwPrivate: function(ps) {
+		return this.assertFalse(ps,{private:true});
+	},
+	linkFile: function(ps) {
+		ps.itemUrl = ps.pageUrl;
+		ps.type = 'link';
+		return ps;
+	},
+	linkAll: function(ps) {
+			ps.itemUrl = ps.pageUrl;
+			ps.description = ps.description || '';
+			if(ps.body) {
+				ps.description += "\n" + ps.body;
+			}
+			ps.type = 'link';
+		return ps;
+	},
+	descLink: function(ps) {
+		ps.description = ps.description || ps.body || '';
+		ps.description = 'SOURCE: ' + ps.pageUrl + "\n\n  " + ps.description;
+		return ps;
+	},
+	descPhoto: function(ps) {
+		ps.description = ps.description || ps.body || '';
+		ps.description = 'IMAGE: ' + ps.itemUrl + "\n\n  " + ps.description;
+		return ps;
+	},
+	descVideo: function(ps) {
+		if(ps.body && ps.body.match(/<embed|<object/)) {
+		//ps.body = ps.body.replace(/(\<|\<\/)\s*object/g,'$1embed');
+			ps.type = 'video';
+		}
+		if(ps.description && ps.description.match(/<embed|<object/)) {
+			ps.body = ps.description;//.replace(/(\<|\<\/)\s*object/g,'$1embed');
+			ps.description = "";
+			ps.type = 'video';
+		}
+		return ps;
+	},
+	copyPost: function (ps,ext) {
+		var newps = cloneObject(ps);
+		if(ps.tags) {
+			newps.tags = [];
+			for(i in ps.tags) {
+				newps.tags[i] = ps.tags[i];
+			}
+		}
+		if(ext) {
+			return this.extendPost(newps);
+		}
+		else {
+			return newps;
+		}
+	},
+	extendPost: function (ps) {
+		if(ps.extended) {
+			return ps;
+		}
+		var tag = joinText(ps.tags, ' ');
+		if(tag) {	
+			if(tag.match(/,/)) {
+				ps.tags = tag.split(/\s*,\s*/);
+			}
+			if(tag.match(/nsfw|adult|^X-|avcover|avstar|blowjob|nude|tits|porn/,'i')) {
+				ps.adult = true;
+				ps.private = true;
+			}
+			else {
+				ps.adult = false;
+			}
+			if(tag.match(/private|myself/,'i')) {
+				ps.private = true;
+			}
+			if(tag.match(/public/,'i')) {
+				ps.private = false;
+			}
+			if(tag.match( ps.type + 'link')) {
+				ps.tagtype = true;
+			}
+			if(tag.match(/gallery|galleries/,'i')) {
+				ps.gallery = 1;
+			}
+			else {
+				ps.gallery = 0;
+			}
+		}
+		var typetag = ps.type + 'link';
+		if(tag && tag.match(typetag)) {
+		}
+		else if(!(ps.file || ps.type == 'link' )) {
+			if(!ps.tags) {
+				ps.tags = [ps.type + 'link'];
+			}
+			else {
+				ps.tags.push(ps.type + 'link');
+			}
+		}
+		if(ps.item) {
+			ps.item = ps.item.replace(/\s+-\s+.*-\s+.*$/,'');
+		}
+		ps.extended = true;
+		return ps;
+	},
+	createPost : function(oldps,template) {
+		oldps = this.extendPost(oldps);
+		var ps = this.copyPost(oldps);
+		if(!template) return ps;
+		if(template.match(/weheartit/)) {
+		}
+		if(template.match(/firefox/)) {
+			if(ps.file)  {
+				this.linkFile(ps);
+			}
+			else if(ps.type == 'photo') {
+				ps.itemUrl = ps.pageUrl + '#photo-url:' + ps.itemUrl;
+				this.descPhoto(ps);
+			}
+			else {
+				this.linkAll(ps);
+			}
+		}
+		if(template.match(/ikeepu/)) {
+			if(ps.file) {
+				this.linkFile(ps);
+			}
+			else if(ps.type.match(/quote|text|conversation/)) {
+				this.linkAll(ps);
+			}
+		}
+		if(template.match(/tumblr/)) {
+			//ps.description = ps.description || ps.body;
+			//ps.description = ps.item + "\n\n" + ps.description;
+		}
+		if(template.match(/weibo/)) {
+			if(ps.file) this.fileLink(ps);
+			if(ps.type == 'photo') {
+				this.descPhoto(ps);
+			}
+		}
+		if(template.match(/delicious/)) {
+			if(ps.file) this.linkFile(ps);
+			else if(ps.type == 'photo') {
+				ps.itemUrl = ps.itemUrl + '#source-url:' + ps.pageUrl;
+				this.descLink(ps);
+			}
+			else if(ps.type.match(/quote|text|video|conversation/)) {
+				ps.itemUrl = ps.pageUrl;
+				if(ps.body) {
+					ps.description += "\n" + ps.body;
+				}
+			}
+		}
+		if(template.match(/\+source/)) {
+			if(ps.type == 'photo') {
+				this.descPhoto(ps);
+			}
+		}
+		if(template.match(/\+video/)) {
+			this.descVideo(ps);	
+		}
+		if(template.match(/-file/) && ps.file) {
+			this.linkFile(ps);
+		}
+		return ps;
+	},
+	hookModel : function(ModelName,template,check,assert) {
+		var thismodel = models[ModelName];
+		if(thismodel) {
+			if(thismodel.ori_post || thismodel.ori_check) {
+				return;
+			}
+			thismodel.ori_post = thismodel.post;
+			thismodel.post = function(oldps) {
+				var ps = modelExt.createPost(oldps,template);
+				if(assert) {
+					modelExt.assertFalse(assert);
+				}
+				return thismodel.ori_post(ps);
+	    	};
+			thismodel.ori_check = thismodel.check;
+			thismodel.check = function(ps) {
+				if(thismodel.ori_check(ps)) {
+					return true;
+				}
+				if(check) {
+					return ps.type.match(check);
+				}
+				else {
+					return true;
+				}
+				return false;
+			};
+		}
+		else {
+			alert('No model named ' + ModelName + ' for pre processing.');
+			return false;
+		}
+	},
 };
-
-models.convert_to_link = function (ps) {
-	var newps = models.copy_post(ps);
-	if(ps.type == 'photo') {
-		newps.itemUrl = ps.pageUrl + '#photo-url:' + ps.itemUrl;
-		newps.description = ps.description ? (ps.itemUrl + '\n' + ps.description) : ps.itemUrl;
-	}
-	else if(ps.type == 'quote' || ps.type == 'text') {
-		newps.itemUrl = ps.pageUrl;
-		newps.description = ps.description ? (ps.description + '\n\n' + ps.body) : ps.body;	
-	}
-	return newps;
-};
-
