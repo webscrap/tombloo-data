@@ -1,5 +1,41 @@
 //Tombloo.Service.o_post = Tombloo.Service.post;
 Tombloo.Service.extractors.register({
+		name : 'Video from Selection',
+		ICON : 'chrome://tombloo/skin/video.png',
+		check : function(ctx){
+			return ctx.selection;
+		},
+		extract : function(ctx) {
+			var body = createFlavoredString(ctx.window.getSelection());
+			var video;
+			var m = body.match(/<embed\s*(.+)<\/embed/);
+			if(m) {
+				video = m[1];
+			}
+			else {
+				m = body.match(/<object\s*(.+)<\/object/);
+				if(m) video = m[1];
+			}
+			if(video) {
+				return {
+					type: 'video',
+					body: body,
+					video: video,
+					item    : ctx.title,
+					itemUrl : ctx.href,
+				}
+			}
+			else {
+				return {
+					type: 'quote',
+					body: body,
+					item    : ctx.title,
+					itemUrl : ctx.href,
+				}
+			}
+		},
+});
+Tombloo.Service.extractors.register({
 		name : 'Photos from Selection',
 		ICON : 'chrome://tombloo/skin/photo.png',
 		check : function(ctx){
