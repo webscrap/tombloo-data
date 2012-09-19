@@ -36,6 +36,7 @@ var xUtils = {
 		return '';
 	},
 }
+
     
 if(typeof(models)=='undefined')
 	this.models = models = new Repository();
@@ -54,14 +55,7 @@ models.register({
 	POSTDATA=url=URL&title=TITLE&desc=DESC&labels=tag1%2Ctag2&share=1
 	*/
 	post : function(oldps){
-		models.pre_post(oldps);
-		var ps;
-		if(oldps.file) {
-			ps = models.file_to_link(oldps);
-		}
-		else {
-			ps = models.convert_to_link(oldps);
-		}
+		var ps = modelExt.createPost(oldps,'firefox');//s.pre_post(oldps);
 	    var tag = joinText(ps.tags, ',');
         return request('http://sc.115.com/add', {
             referrer    : ps.pageUrl,
@@ -69,16 +63,14 @@ models.register({
                 url         : ps.itemUrl,
                 title       : ps.item,
                 labels      : tag,
-                desc        : ps.description || ps.body || ps.pageUrl,
+                desc        : ps.description,
 				share		: ((ps.adult || ps.private) ? '0' : '1'),
            },
         });
 	},
 	
 });
-if(typeof(models)=='undefined')
-	this.models = models = new Repository();
-    
+
 models.register({
 	name : '百度搜藏',
 	ICON : 'http://cang.baidu.com/favicon.ico',
@@ -89,14 +81,7 @@ models.register({
 	},
 	
 	post : function(oldps){
-		models.pre_post(oldps);
-		var ps;
-		if(oldps.file) {
-			ps = models.file_to_link(oldps);
-		}
-		else {
-			ps = models.convert_to_link(oldps);
-		}
+		var ps = modelExt.createPost(oldps,'firefox');
 	    var tag = joinText(ps.tags, ',');
         //tag = joinText(tag.split(/\s*,\s*/),',');
 		/*
@@ -122,7 +107,6 @@ models.register({
 	
 });
 
-
 (function() {
     var thismodel = models.Delicious;
     if(thismodel) {
@@ -132,25 +116,16 @@ models.register({
 		};
     	thismodel.ori_post = thismodel.post;
     	thismodel.post =  function(oldps){
-    		models.pre_post(oldps);
-    		var ps;
-    		if(oldps.file) {
-    			ps = models.file_to_link(oldps);
-    		}
-			else if(oldps.type.match(/photo|link/)) {
-				ps = oldps;
-			}
-    		else {
-    			ps = models.convert_to_link(oldps);
-    		}
+			var ps = modelExt.createPost(oldps,'delicious');
+			//var ps = oldps;
 			if(ps.adult) {
 				ps.private = 'true';
 			}
-			if(ps.private) {
+			else if(ps.private) {
 				ps.private = 'true';
 			}
 			else {
-				ps.private = false;//'false';
+				ps.private = '';//'false';
 			}
 			return thismodel.ori_post(ps);
 		};
@@ -204,7 +179,6 @@ models.register({
     }
 })(); 
 
-
 models.register({
 	name : '点点',
 
@@ -248,7 +222,10 @@ models.register({
 					throw new Error(getMessage('error.notLoggedin'));
 				}
 			*/
-				var m = r.match(/ENV\.blogUrl\s*=\s*'([^']+)/);
+				var m = r.match(/\{value:"([^"]+)",\s*isPrivace:"1"/);
+				if(!m) {
+					m = r.match(/ENV\.blogUrl\s*=\s*'([^']+)/);
+				}
 				if(m) {
 					blogid = m[1];
 				}
@@ -278,13 +255,8 @@ models.register({
 		});
 	},
 	post : function(oldps){
-		models.pre_post(oldps);
-		var ps = oldps;
-		if(ps.file) {
-			ps = models.file_to_link(oldps);
-		}
+		var ps = modelExt.createPost(oldps,'tumblr-file');
 	    var tag = joinText(ps.tags, ',');
-		ps = models.link_to_video(ps);
 		if(ps.type == 'photo') {
 			return this.upload(ps).addCallback(function(data) {
 				if(data) {
@@ -331,22 +303,25 @@ models.register({
 });
 
 
-models.preprocess('FirefoxBookmark',true,true,true);
-if(models.FirefoxBookmark) {
-	var thismodel = models.FirefoxBookmark;
-	thismodel.check = function(ps){
+update(models['FirefoxBookmark'], {
+	check: function(ps){
 		return true;
 		return (/(photo|quote|link)/).test(ps.type);
-	};
-}
+	},
+	ori_post: models['FirefoxBookmark'].post,
+	post: function(oldps) {
+		var ps = modelExt.createPost(oldps,'firefox');
+		return models['FirefoxBookmark'].ori_post(ps);
+	},
+});
 
 
 (function() {
 	if(models.Flickr) {
 	var thismodel = models.Flickr;
 	thismodel.ori_post = thismodel.post;
-	thismodel.post = function(ps){
-		models.pre_post(ps);
+	thismodel.post = function(oldps){
+		var ps = modelExt.createPost(oldps);
 		var tags = joinText(ps.tags, ' ');
 		var desc = ps.description || '';
 		if(tags.match(/reupload/)) {
@@ -379,8 +354,9 @@ models.register({
 	
 	URL=http://www.girlfound.com/add/item/
 	*/
-	post : function(ps){
-		models.pre_post(ps);
+	post : function(oldps){
+		var ps = modelExt.createPost(oldps,'weheartit');
+		modelExt.assertFalse(ps,{'adult':true,'private':true});
 		var tag = joinText(ps.tags, ',');
         return request('http://www.girlfound.com/add/item/', {
             referrer    : 'http://www.girlfound.com/post/?uri=' + ps.itemUrl + '&title=' + ps.item + '&loc=' + ps.pageUrl,
@@ -400,7 +376,7 @@ models.register({
 	name : '花瓣',
 	ICON : 'http://huaban.com/favicon.ico',
 	check : function(ps){
-		return ps.type == 'photo';
+		return (ps.type == 'photo' && !ps.file);
 	},
 	getid : function(ps) {
 //	URL=http://huaban.com/bookmarklet/?media=http%3A%2F%2Fimg.ikeepu.com%2Fimg%2F30%2F11%2F90%2F634727053504676223.jpg_500&url=http%3A%2F%2Fikeepu.com%2F&w=500&h=500&alt=&title=%E6%94%B6%E8%97%8F%E5%96%9C%E6%AC%A2%EF%BC%8C%E5%88%86%E4%BA%AB%E4%B9%90%E8%B6%A3%20-%20%E7%88%B1%E5%BA%93%E7%BD%91%20Beta&description=&media_type=&video=&
@@ -436,19 +412,9 @@ models.register({
 		});
 	},
 	post : function(oldps){
-		models.pre_post(oldps);
-		var ps = oldps;
-		if(ps.adult) {
-			throw new Error("Adult content ignored.");
-		}
-		if(ps.private) {
-			throw new Error("Private content ignored.");
-		}
-		if(ps.file) {
-			ps = models.file_to_link(oldps);
-		}
+		var ps = modelExt.createPost(oldps,'weheartit');
+		modelExt.assertFalse(ps,{'adult':true,'private':true});
 	    var tag = joinText(ps.tags, ',');
-		ps = models.link_to_video(ps);
 		if(ps.type == 'photo') {
 /*		
 URL=http://huaban.com/pins/
@@ -514,11 +480,7 @@ models.register({
 		});
 	},
 	post : function(oldps){
-		models.pre_post(oldps);
-		var ps = oldps;
-		if(ps.file) {
-			ps = models.file_to_link(oldps);
-		}
+		var ps = modelExt.createPost(oldps,'ikeepu+video');
 	    var tag = joinText(ps.tags, ',');
         tag = joinText(tag.split(/\s*,\s*/),' ');
         var privacy = '0';
@@ -549,7 +511,6 @@ description=DESC
 */
 		//var actionUrl = 'http://ikeepu.com/me/keep';
 		var actionUrl = 'http://ikeepu.com/apps/bookmark/add';
-		ps = models.link_to_video(ps);
         if(ps.type == 'photo') {
             return this.request(actionUrl, {
                 referrer    : ps.pageUrl ,
@@ -563,7 +524,7 @@ description=DESC
                     privacy     : privacy,
                     sync        : sync,
                     category    : category,
-                    description : ps.description || ps.itemUrl,
+                    description : ps.description,
                     type        : ps.gallery ? 'page' : 'image',
                     thumb       : ps.itemUrl,
 					referer		: ps.pageUrl,
@@ -574,6 +535,9 @@ description=DESC
 			var embed = ps.body;
 			var dom = convertToHTMLDocument(embed); 
 			embed = dom.getElementsByTagName('embed')[0];
+			if(!embed) {
+				embed = dom.getElementsByTagName('object')[0];
+			}
 			//url=http://static.youku.com/v1.0.0188/v/swf/player.swf||VideoIDS=XMzAxMzQ0NTMy&ShowId=0&Cp=0&Light=on&THX=off&Tid=0&isAutoPlay=true&Version=/v1.0.0705&show_ce=1&winType=interior
 			var url = embed.getAttribute('src') + '||';
 			var attrs = new Array();
@@ -600,7 +564,7 @@ description=DESC
                     privacy     : privacy,
                     sync        : sync,
                     category    : category,
-                    description : ps.description || ps.pageUrl,
+                    description : ps.description,
                     type        : 'video',
                },
             });
@@ -620,7 +584,7 @@ description=DESC
                     category    : category,
 					referer		: ps.pageUrl,
 					thumb		: '',
-                    description : ps.description || ps.pageUrl,
+                    description : ps.description,
                     type        : 'page',
                },
             });
@@ -638,9 +602,10 @@ models.register({
 		return (/photo|quote/).test(ps.type) && !ps.file;
 	},
 	
-	post : function(ps){
+	post : function(oldps){
         var privacy = '0';
-		models.pre_post(ps);
+		var ps = modelExt.createPost(oldps,'weheartit');
+		modelExt.assertFalse(ps,{'adult':true,'private':true});
         if(ps.adult || ps.private) {
             privacy = '1';
         }
@@ -679,11 +644,11 @@ models.register({
 		return (/photo|quote/).test(ps.type) && !ps.file;
 	},
 	
-	post : function(ps){
+	post : function(oldps){
+		var ps = modelExt.createPost(oldps,'weheartit');
 	    var tag = new String(encodeURI(joinText(ps.tags, ',')));
 		tag = tag.substr(0,94).replace(/%/,'');
 		var nsfw = false;
-		models.pre_post(ps);
         if(ps.adult || ps.private) {
             nsfw = true;
         }	
@@ -738,8 +703,7 @@ models.register({
 	},
 
 	post : function(oldps){
-		models.pre_post(oldps);
-		var ps = oldps;
+		var ps = modelExt.createPost(oldps);
 	    var tag = joinText(ps.tags, ',');
 		var process = new Process(new LocalFile('/myplace/bin/tombloo-bridge'));
 		var profd =  DirectoryService.get('ProfD', IFile).path;
@@ -840,20 +804,10 @@ models.register({
 		});
 	},
 	post : function(oldps){
-		models.pre_post(oldps);
-		var ps = oldps;
-		if(ps.file) {
-			ps = models.file_to_link(oldps);
-		}
-		if(ps.adult) {
-			throw new Error("Adult content ignored.");
-		}
-		if(ps.private) {
-			throw new Error("Private content ignored.");
-		}
+		var ps = modelExt.createPost(oldps,'tumblr-file+video');
+		modelExt.assertFalse(ps,{'adult':false,'private':false});
 	    var tag = joinText(ps.tags, ',');
 		var actionUrl = 'http://www.tuita.com/post/create';
-		ps = models.link_to_video(ps);
 		return this.upload(ps).addCallback(function(data) {
 			if(data) {
 				var source = xUtils.escapeCode(ps.pageUrl);
@@ -899,8 +853,7 @@ models.register({
 
 models.Tumblr.post = function(oldps){
 		var self = this;
-		models.pre_post(oldps);
-		var ps = oldps;
+		var ps = modelExt.createPost(oldps,'tumblr+video');
 		var endpoint = Tumblr.TUMBLR_URL + 'new/' + ps.type;
 		return this.postForm(function(){
 			return self.getForm(endpoint).addCallback(function(form){
@@ -913,7 +866,7 @@ models.Tumblr.post = function(oldps){
 		});
 	};
 
-models.preprocess('Tumblr',0,0,1);
+modelExt.hookModel('Tumblr','tumblr+video');
 
     
 models.register({
@@ -924,10 +877,10 @@ models.register({
 		return (/photo|quote/).test(ps.type) && !ps.file;
 	},
 	
-	post : function(ps){
+	post : function(oldps){
+		var ps = modelExt.createPost(oldps,'weheartit');
 	    var tag = joinText(ps.tags, ',');
         var nsfw = false;
-		models.pre_post(ps);
         if(ps.adult) {
             nsfw = true;
         }
@@ -975,8 +928,7 @@ models.register({
 	allDir : xUtils.getDir('all'),
 
 	post : function(oldps){
-		models.pre_post(oldps);
-		var ps = oldps;
+		var ps = modelExt.createPost(oldps,'weheartit');
 	    var tag = joinText(ps.tags, ',');
 		if(ps.type=='photo'){
 			return this.postPhoto(ps,this.allDir);
@@ -1052,14 +1004,9 @@ update(models.WeHeartIt,{
 	check : function(ps){
 		return ps.type.match(/photo|quote/)  && !ps.file;
 	},
-	post : function(ps){
-		models.pre_post(ps);
-		if(ps.adult) {
-			throw new Error("Adult content ignored.");
-		}
-		if(ps.private) {
-			throw new Error("Private content ignored.");
-		}
+	post : function(oldps){
+		var ps = modelExt.createPost(oldps,'weheartit');
+		modelExt.assertFalse(ps,{'adult':true,'private':true});
 		if(!this.getAuthCookie())
 			return fail(new Error(getMessage('error.notLoggedin')));
 		return request(this.URL + 'create_entry/', {
@@ -1094,14 +1041,7 @@ models.register({
 	POSTDATA=title=TITLE&url=http%3A%2F%2FURL&tags=TAG1%2CTAG2&note=DESC%0D%0ADESC
 	*/
 	post : function(oldps){
-		models.pre_post(oldps);
-		var ps;
-		if(oldps.file) {
-			ps = models.file_to_link(oldps);
-		}
-		else {
-			ps = models.convert_to_link(oldps);
-		}
+		var ps = modelExt.createPost(oldps,'firefox');
 	    var tag = joinText(ps.tags, ',');
         return request('http://shuqian.youdao.com/manage?a=add', {
             referrer    : ps.pageUrl,
@@ -1147,11 +1087,7 @@ models.register({
 		});
 	},
 	post : function(oldps){
-		models.pre_post(oldps);	
-		var ps = oldps;
-		if(ps.file) {
-			ps = models.file_to_link(oldps);
-		}
+		var ps = modelExt.createPost(oldps,'ikeepu');
 	    var tag = joinText(ps.tags, ',');
         var ispublic = 'y';
         if(ps.adult || ps.private) {
@@ -1252,23 +1188,13 @@ models.register({
 		});
 	},
 	post : function(oldps){
-		models.pre_post(oldps);
-		if(oldps.adult) {
-			throw new Error("Adult content ignored.");
-		}
-		if(oldps.private) {
-			throw new Error("Private content ignored.");
-		}
-		var ps = oldps;
-		if(ps.file) {
-			ps = models.file_to_link(oldps);
-		}
+		var ps = modelExt.createPost(oldps,'weheartit');
+		modelExt.assertFalse(ps,{'adult':true,'private':true});
 	    var tag = joinText(ps.tags, ',');
 		var tag_text = joinText(ps.tags,' #');
 		if(tag_text) {
 			tag_text = '[#' + tag_text + ']';
 		}
-		ps = models.link_to_video(ps);
 		if(ps.type == 'photo') {
 			return this.upload(ps).addCallback(function(data) {
 /*
@@ -1408,13 +1334,22 @@ models.register({
 		});
 	},
 	post : function(oldps){
-		models.pre_post(oldps);
-		var ps = oldps;
-		if(ps.file) {
-			ps = models.file_to_link(oldps);
+		var ps = modelExt.createPost(oldps,'tumblr-file+video');
+//		modelExt.assertFalse(ps,{'adult':true,'private':true});
+//		var tag;
+		if(ps.tags && ps.tags.length > 5) {
+			tag = joinText([
+					ps.tags[0],
+					ps.tags[1],
+					ps.tags[2],
+					ps.tags[3],
+					ps.tags[4]
+				],',');
+
 		}
-	    var tag = joinText(ps.tags, ',');
-		ps = models.link_to_video(ps);
+		else {
+			tag = joinText(ps.tags, ',');
+		}
 		if(ps.type == 'photo') {
 			return this.upload(ps).addCallback(function(data) {
 /*
@@ -1443,7 +1378,7 @@ D=o[0].img.substring(o[0].img.indexOf("mw600/")+6,o[0].img.lastIndexOf("."))
 							pid			: pid,
 							title		: ps.item,
 							photos		: '[{"img":"' + data + '","desc":""}]',
-							privacy		: ps.private ? '1' : '0',
+							privacy		: '1',
 							tag			: ps.private ? tag : tag,
 							type		: 'pic',
 							pub			: ps.private ? 'draft' : '0',
@@ -1472,15 +1407,15 @@ D=o[0].img.substring(o[0].img.indexOf("mw600/")+6,o[0].img.lastIndexOf("."))
 	
 });
 
-models.preprocess('GoogleBookmarks',1,1,1);
+modelExt.hookModel('GoogleBookmarks','firefox','link|photo|video|text');
 
 if(models.Twitpic) {
-	models.preprocess('Twitpic',1,1,1);
 	models.Twitpic.ICON = 'https://twitpic.com/favicon.ico';
 	models.Twitpic.POST_URL = 'https://twitpic.com/upload';
+	modelExt.hookModel('Twitpic','weheartit');
 }
 
-models.preprocess('Twitter',1,0,1);
+modelExt.hookModel('Twitter','weibo');
 
 
 
@@ -1507,8 +1442,10 @@ models.register({
 			}
 		},
 	},
-	post : function(ps){
+	post : function(oldps){
 		var self = this;
+		var ps = modelExt.createPost(oldps,'weheartit');
+		modelExt.assertFalse(ps,{'adult':true,'private':true});
 		//URL=http://kan.weibo.com/editwithplugin?title=%E6%88%91%E7%9A%84%E5%BE%AE%E5%8D%9A%20%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A-%E9%9A%8F%E6%97%B6%E9%9A%8F%E5%9C%B0%E5%88%86%E4%BA%AB%E8%BA%AB%E8%BE%B9%E7%9A%84%E6%96%B0%E9%B2%9C%E4%BA%8B%E5%84%BF&referrer=http%3A%2F%2Fwww.weibo.com%2Fsesadit%2Fprofile%3Fleftnav%3D1%26wvr%3D3.6%26mod%3Dpersonnumber&medias=[%22http%3A%2F%2Ftp1.sinaimg.cn%2F2820910492%2F180%2F40000413578%2F1%22]&editType=3
 		var editor = self.URL + 'editwithplugin';
 //URL=http://kan.weibo.com/aj/kandian/addsimple?__rnd=1347471754089

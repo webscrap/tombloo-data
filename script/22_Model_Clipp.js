@@ -8,15 +8,7 @@
     	};
     	thismodel.ori_post = thismodel.post;
     	thismodel.post = function(oldps) {
-    		models.pre_post(oldps);
-    		var ps = oldps;
-    		if(ps.file) {
-    			ps = models.file_to_link(oldps);
-    		}
-			ps = models.link_to_video(ps);
-			if(ps.type == 'photo') {
-				ps.pageUrl = ps.pageUrl + '#' + ps.itemUrl;
-			}
+			var ps = modelExt.createPost(oldps,'tumblr+video');
     		return thismodel.ori_post(ps);
     	};
     }
