@@ -35,8 +35,44 @@ var xUtils = {
 		}
 		return '';
 	},
-}
-
+	// ----- Helper functions -----
+	/**
+	 * スカラー型となりうる値のみ文字列として評価する
+	 *
+	 * @param  {Mixed}   x   任意の値
+	 * @return {String}      文字列としての値
+	 */
+	stringify :	function (x) {
+	    let result = '', c;
+	    if (x !== null) {
+	        switch (typeof x) {
+	            case 'string':
+	            case 'number':
+	            case 'xml':
+	                result = x;
+	                break;
+	            case 'boolean':
+	                result = x ? 1 : '';
+	                break;
+	            case 'object':
+	                if (x) {
+	                    c = x.constructor;
+	                    if (c === String || c === Number ||
+	                        (typeof XML !== 'undefined' && c === XML)
+	                    ) {
+	                        result = x;
+	                    } else if (c === Boolean) {
+	                        result = x ? 1 : '';
+	                    }
+	                }
+	                break;
+	            default:
+	                break;
+	        }
+	    }
+	    return result.toString();
+	},
+};
     
 if(typeof(models)=='undefined')
 	this.models = models = new Repository();
