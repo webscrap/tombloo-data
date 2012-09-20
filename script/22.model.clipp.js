@@ -9,6 +9,9 @@
     	thismodel.ori_post = thismodel.post;
     	thismodel.post = function(oldps) {
 			var ps = modelExt.createPost(oldps,'tumblr+video');
+			if(ps.type == 'photo') {
+				ps.pageUrl += '#photo-url:' + ps.itemUrl;
+			}
     		return thismodel.ori_post(ps);
     	};
     }
