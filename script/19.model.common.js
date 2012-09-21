@@ -74,13 +74,14 @@ var modelExt = {
 		return ps;
 	},
 	copyPost: function (ps,ext) {
-		var newps = cloneObject(ps);
-		if(ps.tags) {
+		var newps = update({},ps);//cloneObject(ps);
+/*		if(ps.tags) {
 			newps.tags = [];
 			for(i in ps.tags) {
 				newps.tags[i] = ps.tags[i];
 			}
 		}
+*/
 		if(ext) {
 			return this.extendPost(newps);
 		}

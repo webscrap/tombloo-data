@@ -1,5 +1,5 @@
 
-
+alert('99.model.google.js');
 
 
 (function() {
@@ -85,6 +85,7 @@
 			                });
 						}
 						r = JSON.stringify({aclEntries : scope});
+						alert(r);
 						self.createScopeSpar = function() {return r};
 					}
 					return saved(args);
@@ -99,6 +100,7 @@
 				}
 				ps.description = ps.description ? ps.description + ' ' + tagtext : tagtext;
 				args[0] = ps;
+				alert(ps.description);
 				return ori_func(args);
 			});
 		}

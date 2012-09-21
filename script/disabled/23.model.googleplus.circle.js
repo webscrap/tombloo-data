@@ -35,7 +35,6 @@
  */
 callLater(0, function() {
 
-
 // モデル名
 const GOOGLE_PLUS_NAME = 'Google+';
 
