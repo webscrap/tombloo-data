@@ -35,6 +35,12 @@ var xUtils = {
 		}
 		return '';
 	},
+	toTagText	: function(tags) {
+		if(tags.length) {
+			return '#' + joinText(tags, ' #');
+		}
+		return '';
+	},
 	// ----- Helper functions -----
 	/**
 	 * スカラー型となりうる値のみ文字列として評価する
