@@ -154,7 +154,7 @@ autoSaveId=5087813
 					var source = xUtils.escapeCode(ps.pageUrl);
 					data.source = source;
 					data.tag = tag;
-					return self.queue(data,ps).addCallback(self.checkPost);
+					return self.queue(data,ps).addCallback(function(res) {return self.checkPost(res,ps);});
 					/*
 					return request(actionUrl,{
 						referrer	: data.referer,
@@ -196,11 +196,12 @@ autoSaveId=5087813
 	},
 	checkPost : function(res,ps) {
 		var r = res.responseText;
-		if(r.match(/"errCode":"0"/)) {
+		var self = this;
+		if(r.match(/"errCode":\s*("0"|0)\s*,/)) {
 			return res;
 		}
 		else {
-			addTab(url);
+			self.share(ps,1);
 			throw new Error("Post failed:\n " + r);
 		}
 	},
