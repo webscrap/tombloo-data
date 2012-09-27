@@ -1,22 +1,86 @@
 if(typeof(models)=='undefined')
-
 	models = new Repository();
 
-function cloneObject(oldObj) {
-  var newObj = (oldObj instanceof Array) ? [] : {};
-  for (i in oldObj) {
-    if (oldObj[i] && typeof oldObj[i] == "object") {
-		try {
-			newObj[i] = cloneObject(oldObj[i]);
+var xUtils = {
+	escapeCode : function (text) {
+		var code = text.replace('\\','\\\\','g');
+		code = code.replace('"','\\"','g');
+		code = code.replace('/','\\/','g');
+		return code;
+	},
+	saveUrl : function (url) {
+		var file = getDataDir('photo');
+		createDir(file);
+		var uri = createURI(url);
+		var fileName = validateFileName(uri.fileName);
+		file.append(fileName);
+		clearCollision(file);
+		return download(url, file);
+	},
+	getDir : function(name,root) {
+		var dir = DirectoryService.get('ProfD', IFile);
+		if(root) {
+			dir.append(root);
 		}
-		catch(e) {
+		else {
+			dir.append('websaver');
 		}
-    } 
-	else {
-		newObj[i] = oldObj[i];
-	}
-  } 
-  return newObj;
+		if(!dir.exists()) {
+			createDir(dir);
+		}
+		name && dir.append(name);
+		return dir;
+	},
+	toWeiboText : function(tags) {
+		var t = joinText(tags,'#, #');
+		if(t) {
+			return '#' + t + '#';
+		}
+		return '';
+	},
+	toTagText	: function(tags) {
+		if(tags.length) {
+			return '#' + joinText(tags, ' #');
+		}
+		return '';
+	},
+	// ----- Helper functions -----
+	/**
+	 * スカラー型となりうる値のみ文字列として評価する
+	 *
+	 * @param  {Mixed}   x   任意の値
+	 * @return {String}      文字列としての値
+	 */
+	stringify :	function (x) {
+	    let result = '', c;
+	    if (x !== null) {
+	        switch (typeof x) {
+	            case 'string':
+	            case 'number':
+	            case 'xml':
+	                result = x;
+	                break;
+	            case 'boolean':
+	                result = x ? 1 : '';
+	                break;
+	            case 'object':
+	                if (x) {
+	                    c = x.constructor;
+	                    if (c === String || c === Number ||
+	                        (typeof XML !== 'undefined' && c === XML)
+	                    ) {
+	                        result = x;
+	                    } else if (c === Boolean) {
+	                        result = x ? 1 : '';
+	                    }
+	                }
+	                break;
+	            default:
+	                break;
+	        }
+	    }
+	    return result.toString();
+	},
 };
 
 var modelExt = {
