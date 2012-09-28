@@ -134,3 +134,34 @@ update(Tombloo.Service, {
 		return Tombloo.Service.o_post(ps,posters);
 	},
 });
+
+[
+	'Photo',
+	'Link',
+	'Photo - background image',
+	'Photo - Capture',
+	'Text',
+	'Photo - area element',
+	'Photo - image link',
+	'Photo - Upload from Cache',
+].forEach(function(value) {
+	var target = Tombloo.Service.extractors[value];
+	if(target) {
+		var self = target;
+		addAround(self,'extract', function(ori_func,args) {
+			var ctx = args[0];
+			var ps = ori_func(args);
+			if(!ps) {
+				return ps;
+			}
+			if((!ps.body) && (!ps.description) && ctx) {
+				ps.body = createFlavoredString(ctx.window.getSelection());
+				if((!ps.description) && ps.body) {
+					ps.description = ps.body;
+					ps.body = null;
+				}
+			}
+			return ps;
+		});
+	}
+});

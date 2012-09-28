@@ -74,7 +74,6 @@ models.register({
 				wb_desc		: ps.item,
 				wb_title	: (ps.description ? ps.description + "\n\n" + tag_text : tag_text),
 			});
-			console.log(JSON.stringify(data));
 			return request(actionUrl,{
 				referrer	: data.wb_url,
 				'X-Requested-With' : 'XMLHttpRequest',

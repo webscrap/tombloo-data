@@ -266,31 +266,33 @@ var modelExt = {
 	},
 	hookModel : function(ModelName,template,check,assert) {
 		var thismodel = models[ModelName];
-		if(thismodel) {
-			if(thismodel.ori_post || thismodel.ori_check) {
-				return;
-			}
-			thismodel.ori_post = thismodel.post;
-			thismodel.post = function(oldps) {
-				var ps = modelExt.createPost(oldps,template);
-				if(assert) {
-					modelExt.assertFalse(assert);
+		if(thismodel && !thismodel.modelExtHooked) {
+			thismodel.modelExtHooked = true;
+			addAround(thismodel,"post",function(ori_post,args) {
+				var oldps = args[0];
+				var ps = oldps;
+				if(template) {
+					ps = modelExt.createPost(oldps,template);
 				}
-				return thismodel.ori_post(ps);
-	    	};
-			thismodel.ori_check = thismodel.check;
-			thismodel.check = function(ps) {
-				if(thismodel.ori_check(ps)) {
+				if(assert) {
+					modelExt.assertFalse(ps,assert);
+				}
+				args[0] = ps;
+				return ori_post(args);
+			});
+			if(!check) {
+				return true;
+			}
+			addAround(thismodel,'check',function(ori_check,args) {
+				if(ori_check(args)) {
 					return true;
 				}
 				if(check) {
-					return ps.type.match(check);
-				}
-				else {
-					return true;
+					ps = args[0];
+					return ps.type && ps.type.match(check);
 				}
 				return false;
-			};
+			});
 		}
 		else {
 			alert('No model named ' + ModelName + ' for pre processing.');
