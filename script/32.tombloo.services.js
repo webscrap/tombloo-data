@@ -154,8 +154,11 @@ update(Tombloo.Service, {
 			if(!ps) {
 				return ps;
 			}
+			if(!ctx.selection) {
+				return ps;
+			}
 			if((!ps.body) && (!ps.description) && ctx) {
-				ps.body = createFlavoredString(ctx.window.getSelection());
+				ps.body = convertToPlainText(ctx.window.getSelection());
 				if((!ps.description) && ps.body) {
 					ps.description = ps.body;
 					ps.body = null;

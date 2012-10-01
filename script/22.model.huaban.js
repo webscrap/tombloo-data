@@ -21,9 +21,12 @@ models.register({
 				},
 			}	
 		).addCallback(function(res) {
+			var id = getPref("target.huaban.com");
+			if(id) {
+				return {id:id,referer:apiurl};
+			}
 			var r = res.responseText;
 			if(r) {
-				var id;
 				var m = r.match(/"board_id"\s*:\s*(\d+)/);
 				if(m) {
 					id = m[1];
