@@ -196,9 +196,10 @@ var modelExt = {
 				ps.tags.push(ps.type + 'link');
 			}
 		}
-		if(ps.item) {
+		/*if(ps.item) {
 			ps.item = ps.item.replace(/\s+-\s+.*-\s+.*$/,'');
 		}
+		*/
 		ps.extended = true;
 		return ps;
 	},
@@ -213,8 +214,8 @@ var modelExt = {
 				this.linkFile(ps);
 			}
 			else if(ps.type == 'photo') {
-				ps.itemUrl = ps.pageUrl + '#photo-url:' + ps.itemUrl;
 				this.descPhoto(ps);
+				ps.itemUrl = ps.pageUrl + '#photo-url:' + ps.itemUrl;
 			}
 			else {
 				this.linkAll(ps);
