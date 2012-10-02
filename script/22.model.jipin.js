@@ -71,15 +71,12 @@ price=
 			
 	},
 	checkPost : function(res,ps) {
-		return res;
-		var r = res.responseText;
-		var self = this;
-		if(r.match(/"errCode":\s*("0"|0)\s*,/)) {
+		if(res.status && res.status == 200) {
 			return res;
 		}
 		else {
 			self.share(ps,1);
-			throw new Error("Post failed:\n " + r);
+			throw new Error("Post failed:\n" + res.responseText);
 		}
 	},
 });
