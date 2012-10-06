@@ -94,7 +94,7 @@ description=DESC
 					sid			: '0',
                     url         : url,
 					referer		: ps.pageUrl,
-					thumb		: '',
+					thumb		: ps.thumb || '',
                     title       : ps.item,
                     tag         : tag,
                     privacy     : privacy,
