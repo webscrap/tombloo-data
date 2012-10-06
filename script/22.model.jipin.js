@@ -6,7 +6,7 @@ models.register({
 	check : function(ps){
 		return ps.type == "photo" && (!ps.file);
 	},
-	getAlbum : function(referrer) {
+	getAlbum : function(referrer,ps) {
 		//
 		//URL=http://apitu.jipin.kaixin001.com/user/me/albums
 		var id = getPref('jipin.id');
@@ -19,6 +19,7 @@ models.register({
 		return request(apiurl,{
 			referrer	: referrer || self.SHARE_API,
 		}).addCallback(function(res) {
+			self.checkPost(res,ps);
 			var albums = JSON.parse(res.responseText);
 			if(albums && albums.list) {
 				if(aname) {
@@ -47,7 +48,7 @@ models.register({
 		var desc = ps.item;
 		if(ps.description) desc += "\n\n" + ps.description;
 		if(ps.tags)	desc += "\n\n" + xUtils.toWeiboText(ps.tags);
-		return self.getAlbum(referrer).addCallback(function(album){
+		return self.getAlbum(referrer,ps).addCallback(function(album){
 			return request(apiurl, {
 				referrer	: referrer,
 				sendContent	: {
