@@ -107,12 +107,15 @@ var modelExt = {
 		return ps;
 	},
 	linkAll: function(ps) {
-			ps.itemUrl = ps.pageUrl;
-			ps.description = ps.description || '';
-			if(ps.body) {
-				ps.description += "\n" + ps.body;
-			}
-			ps.type = 'link';
+		ps.description = ps.description || '';
+		if(ps.body) {
+			ps.description += "\n" + ps.body;
+		}
+		if(ps.type == 'link') {
+			return ps;
+		}
+		ps.itemUrl = ps.pageUrl;
+		ps.type = 'link';
 		return ps;
 	},
 	descLink: function(ps) {
