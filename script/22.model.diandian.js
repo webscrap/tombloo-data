@@ -18,12 +18,19 @@ models.register({
 	},
 	share : function(ps,newTab) {
 		var apiurl = this.SHARE_API;
+//		URL=http://www.diandian.com/share?ti=Shay Maria&lo=http://shaymaria.tumblr.com/&f=1&type=link
+		var type = 'image';
+		if(ps.type == 'link') {
+			type = 'link';
+		}
 		var queryString = {
 			ti			: ps.item,
 			lo			: ps.pageUrl,
 			f			: '1',
-			type		: 'image',
-			'src[0]'	: ps.itemUrl,
+			type		: type,
+		}
+		if(ps.type == 'photo') {
+			queryString['src[0]'] = ps.itemUrl;
 		}
 		if(!newTab) {
 			return request(apiurl, {
@@ -45,7 +52,8 @@ models.register({
 		var self = this;
 		return this.share(ps).addCallback(function(res) {
 			var r = res.responseText;
-			log(r);
+			var err;
+			var result;
 			if(r) {
 				var blogid;
 				var photo;
@@ -65,26 +73,32 @@ models.register({
 					blogid = m[1];
 				}
 				else {
+					self.share(ps,1);
 					throw new Error("No post_blog found");
 				}
 				//m = r.match(/{\s*("photo_url"[^}]+)\s*}/);
-				m = r.match(/{"id":"([^"]+)","desc"/);
-				if(m) {
-					photo = m[1];
-				}
-				else {
-					throw new Error("Upload failed");
+				if(ps.type == 'photo') {
+					m = r.match(/{"id":"([^"]+)","desc"/);
+					if(m) {
+						photo = m[1];
+					}
+					else {
+						self.share(ps,1);
+						throw new Error("Upload failed");
+					}
 				}
 				m = r.match(/window.DDformKey\s*=\s*'([^']+)/);
 				if(m) {
 					formkey = m[1];
 				}
 				else {
+					self.share(ps,1);
 					throw new Error("No formKey found! Request failed.");
 				}
 				return {formkey:formkey,blogid:blogid,photo:photo,referer:self.SHARE_API};
 			}
 			else {
+					self.share(ps,1);
 					throw new Error("Server not responsed.Can't upload the picture");
 			}
 		});
@@ -113,22 +127,18 @@ syncToTwitter=false
 syncToFlickr=false
 autoSaveId=5087813
 */
+
 		if(data) {
 			var actionUrl = 'http://www.diandian.com/draft/create';
-			return request(actionUrl,{
-				referrer	: data.referer,
-				'X-Requested-With' : 'XMLHttpRequest',
-                sendContent : {
+			var sendContent = {
 					formKey		: data.formkey,
 					title		: ps.item,
 					tags		: data.tag,
 					desc		: ps.description,
 					layout		: '1',
-					photos		: '[{"id":"' + data.photo + '","desc":"' + ps.item + '"}]',
 					uri			: '',
 					shareSource	: ps.pageUrl,
 					privacy		: (ps.private || ps.adult) ? '2' : '0',
-					type		: 'photo',
 					blogUrl		: data.blogid,
 					queue		: 'true',
 					syncToWeibo	: "false",
@@ -139,7 +149,23 @@ autoSaveId=5087813
 					syncToFacebook	: "false",
 					syncToTwitter	: "false",
 					syncToFlickr	: "false",
-				}
+			};
+			if(ps.type == 'link') {
+				sendContent.link = ps.itemUrl;
+				sendContent.type = 'link';
+				sendContent.desc = ps.itemUrl + "\n" + sendContent.desc;
+			}
+			else if(ps.type == 'photo') {
+				sendContent.photos = '[{"id":"' + data.photo + '","desc":"' + ps.item + '"}]';
+				sendContent.type = 'photo';
+			}
+			else {
+				throw new Error(ps.type + ' is not supported.');
+			}
+			return request(actionUrl,{
+				referrer	: data.referer,
+				'X-Requested-With' : 'XMLHttpRequest',
+                sendContent : sendContent,
 			});
 		}
 	},
@@ -147,52 +173,17 @@ autoSaveId=5087813
 		var ps = modelExt.createPost(oldps,'tumblr-file');
 	    var tag = joinText(ps.tags, ',');
 		var self = this;
-		if(ps.type == 'photo') {
-			return this.upload(ps).addCallback(function(data) {
-				if(data) {
-					var actionUrl = 'http://www.diandian.com/dianlog/' + data.blogid + '/new/photo';
-					var source = xUtils.escapeCode(ps.pageUrl);
-					data.source = source;
-					data.tag = tag;
-					return self.queue(data,ps).addCallback(function(res) {return self.checkPost(res,ps);});
-					/*
-					return request(actionUrl,{
-						referrer	: data.referer,
-						'X-Requested-With' : 'XMLHttpRequest',
-		                sendContent : {
-							formKey		: data.formkey,
-							title		: ps.item,
-							tags		: tag,
-							desc		: ps.description,
-							layout		: '1',
-							photos		: '[{"id":"' + data.photo + '","desc":"' + ps.item + '"}]',
-							uri			: '',
-							shareSource	: ps.pageUrl,
-							privacy		: (ps.private || ps.adult) ? '2' : '0',
-							setTop		: 'false',
-							syncToWeibo	: "false",
-							syncToQqWeibo	: "false",
-							syncToDouban	: "false",
-							syncToQzone	: "false",
-							syncToRenren	: "false",
-							syncToFacebook	: "false",
-							syncToTwitter	: "false",
-							syncToFlickr	: "false",
-						},
-					});
-					*/
-				}
-				else {
-					throw new Error('No photo found');
-				}
-			});
-		}
-		else if(ps.type == 'link') {
-			throw new Error(ps.type + ' is not supported.');
-		}
-		else {
-			throw new Error(ps.type + ' is not supported.');
-		}
+		return this.upload(ps).addCallback(function(data) {
+			if(data) {
+				var source = xUtils.escapeCode(ps.pageUrl);
+				data.source = source;
+				data.tag = tag;
+				return self.queue(data,ps).addCallback(function(res) {return self.checkPost(res,ps);});
+			}
+			else {
+				throw new Error('Sharing failed.');
+			}
+		});
 	},
 	checkPost : function(res,ps) {
 		var r = res.responseText;
