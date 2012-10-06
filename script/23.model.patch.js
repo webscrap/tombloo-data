@@ -19,17 +19,6 @@ update(models.StumbleUpon, {
 	}
 });
 
-update(models['FirefoxBookmark'], {
-	check: function(ps){
-		return true;
-		return (/(photo|quote|link)/).test(ps.type);
-	},
-	ori_post: models['FirefoxBookmark'].post,
-	post: function(oldps) {
-		var ps = modelExt.createPost(oldps,'firefox');
-		return models['FirefoxBookmark'].ori_post(ps);
-	},
-});
 
 models.Tumblr.post = function(oldps){
 	var self = this;
@@ -53,7 +42,7 @@ update(models.WeHeartIt,{
 	},
 	post : function(oldps){
 		var ps = modelExt.createPost(oldps,'weheartit');
-		modelExt.assertFalse(ps,{'adult':true,'private':true});
+		//modelExt.assertFalse(ps,{'adult':true,'private':true});
 		if(!this.getAuthCookie())
 			return fail(new Error(getMessage('error.notLoggedin')));
 		return request(this.URL + 'create_entry/', {
@@ -74,3 +63,6 @@ update(models.WeHeartIt,{
 	},
 });
 
+['FirefoxBookmark','Readability','Instapaper'].forEach(function(name,idx) {
+	modelExt.hookModel(name,'firefox',/photo|quote|link|video|regular/);
+});
