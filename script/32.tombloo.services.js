@@ -150,61 +150,179 @@ Tombloo.Service.extractors.register({
 		},
 });
 
-function post_next(ps,posters,images,index,end) {
-	var img = images[index];
-	ps.itemUrl = img;
-	var doc = ps.window ? ps.window.document : null;
-	if(index < end) {
-		index++;
-		if(doc) {
-			doc.title = '[' + index + '/' + end + '] Posting ' + ps.itemUrl + "...";
+Tombloo.Service.extractors.register({
+	name : 'Video',
+	ICON : 'chrome://tombloo/skin/video.png',
+	check: function(ctx) {
+		return true;
+	},
+	extract : function(ctx) {
+		var embeds = ctx.window.document.getElementsByTagName('embed');//$x('//embed');
+		if(!embeds.length) {
+			embeds = ctx.window.document.getElementsByTagName('object');//$x('//embed');
 		}
-		if(img) {
-			return Tombloo.Service.o_post(ps,posters).addCallback(function() {
-				return post_next(ps,posters,images,index,end);
-			});
+		if(embeds.length) {
+			var code = embeds[0].outerHTML;
+			if(ctx.host.match('youku.com') && embeds.length>1) {
+				code = embeds[1].outerHTML;
+			}
+			code = code.replace(/^\s*<object/,'<embed').replace(/<\/\s*object\s*>/,'</embed>');
+		return {
+			type	: 'video',
+			item	: ctx.title,
+			itemUrl : ctx.href,
+			body	: code,
+			description : code,
+			thumb	: null,
+		};
 		}
 		else {
-			return post_next(ps,posters,images,index,end);
+			throw new Error('No video found');
 		}
 	}
-	else if(doc) {
-		doc.title = ps.item;
-	}
-	return succeed({});
-}
+});
+
+Tombloo.Service.extractors.register({
+	name : 'Photos - Images Miner',
+	ICON : 'http://userscripts.org/images/script_icon.png',
+	check : function(ctx) {
+		return ctx.window.document.getElementById("xz_imagesminer_data");//.childNodes.length;
+	},
+	imageToPost : function(image) {
+		var ps = {};
+		ps.item = image.getAttribute('title');
+		ps.itemUrl = image.getAttribute('src');
+		ps.pageUrl = image.getAttribute('href');
+		ps.description = image.getAttribute('description');
+		if(image.getAttribute('tags')) {
+			ps.tags = image.getAttribute('tags').split(/\s*,\s*/);
+		}
+		return ps;
+	},
+	extract : function(ctx) {
+		var ps = {
+			type	: 'link',
+			item	: ctx.title,
+			itemUrl	: ctx.href,
+			window	: ctx.window,
+		};
+		var images = ctx.window.document.getElementById("xz_imagesminer_data").childNodes;
+		if(images && images.length) {
+			ps.type = 'photo';
+			update(ps,this.imageToPost(images[0]));
+			if(images.length > 1) {
+				ps.description = 'index:[0-' + (images.length -1) + ']';
+				ps.itemUrl = this.ICON;
+				ps.posts = [];
+				ps.item = ctx.title;
+				for(var i=0;i<images.length;i++) {
+					ps.posts.push(this.imageToPost(images[i]));
+				}
+			}
+		}
+		return ps;
+	},
+});
+
 
 update(Tombloo.Service, {
 	o_post	:	Tombloo.Service.post,
-	post_next : function(ps,posters,posts,idx,count) {
-		var doc = ps.window ? ps.window.document : null;
+	post_next : function(oldps,posters,posts,idx,count) {
+		var doc = oldps.window ? oldps.window.document : null;
 		var post = posts[idx];
 		var self = this;
 		if(idx < count) {
 			idx++;
-			var newps = update({},ps,post);
+			var ps = update({},oldps,post);
+			var msg = '[' + idx + '/' + count + '] Posting ' + ps.item + "(" + ps.itemUrl + ") ...";
 			if(doc) {
-				doc.title = '[' + idx + '/' + count + '] Posting ' + newps.itemUrl + "...";
+				doc.title = msg;
 			}
 			if(post) {
-				return self.o_post(newps,posters).addCallback(function() {
+				var ds = {};
+				posters = [].concat(posters);
+				posters.forEach(function(p){
+					try{
+						ds[p.name] = (ps.favorite && RegExp('^' + ps.favorite.name + '(\\s|$)').test(p.name))? p.favor(ps) : p.post(ps);
+					} catch(e){
+						ds[p.name] = fail(e);
+					}
+				});
+				
+				return new DeferredHash(ds).addCallback(function(ress){
+					var errs = [];
+					var ignoreError = getPref('ignoreError');
+					ignoreError = ignoreError && new RegExp(getPref('ignoreError'), 'i');
+					for(var name in ress){
+						var [success, res] = ress[name];
+						if(!success){
+							var msg = name + ': ' + 
+								(res.message.status? 'HTTP Status Code ' + res.message.status : '\n' + self.reprError(res).indent(4));
+							
+							if(!ignoreError || !msg.match(ignoreError))
+								errs.push(msg);
+						}
+					}
+					
+					if(errs.length)
+						self.alertError(errs.join('\n'), ps.page, ps.pageUrl, ps);
 					return self.post_next(ps,posters,posts,idx,count);
+				}).addErrback(function(err){
+					self.alertError(err, ps.page, ps.pageUrl, ps);
+					return self.post_next(oldps,posters,posts,idx,count);
 				});
 			}	
 			else {
-				return self.post_next(ps,posters,posts,idx,count);
+				return self.post_next(oldps,posters,posts,idx,count);
 			}
 		}
 		else if(doc) {
-			doc.title = ps.item;
+			doc.title = oldps.item;
 		}
 		return succeed({});
 	},
 	post	:	function(ps,posters) {
 		var self = this;
 		var posts = [];
-		if(ps.posts && ps.posts.length) {
-			if(ps.type == 'photo' && ps.description) {
+		if(ps.posts) {
+			if(ps.description && ps.description.match(/^index:\[/)) {
+				var mch = ps.description.match(/^index:\[([\d\-,\$\s]+)\]\s*(.*)$/);
+				if(mch) {
+					ps.description = mch[2];
+					var indexs = mch[1].split(/\s*,\s*/);
+					for(var i=0;i<indexs.length;i++) {
+						var t = indexs[i];
+						var m = t.match(/^\s*(\d+)\s*-\s*(\d+|\$)\s*$/);
+						var s;
+						var e;
+						if(m) {
+							s = +m[1];
+							e = m[2];
+							if(e == '$') {
+								e = ps.posts.length - 1;
+							}
+							else {
+								e = +e;
+							}
+						}
+						else {
+							t = t.replace(/^\s+/,'');
+							t = t.replace(/\s+$/,'');
+							if(t.match(/^\d+$/)) {
+								s = +t;
+								e = +t;
+							}
+							else {
+								continue;
+							}
+						}
+						for(var a=s;a<=e;a++) {
+							posts.push(ps.posts[a]);
+						}
+					}
+				}
+			}
+			else if(ps.type == 'photo' && ps.description) {
 				var images = ps.description.split("\n");
 				images.forEach(function(img) {
 					posts.push({itemUrl:img,type:'photo'});
@@ -214,11 +332,16 @@ update(Tombloo.Service, {
 				posts = ps.posts;
 			}
 		}
+		ps.posts = null;
+		//alert("Get " + (posts ? posts.length : '0') + " posts.");
+		//throw new Error("Get " + (posts ? posts.length : '0') + " posts.");
+		//what_the_f();
 		if(posts && posts.length) {
 			alert("Get " + (posts ? posts.length : '0') + " posts.");
 			return self.post_next(ps,posters,posts,0,posts.length);
 		}
 		else {
+			//self.alertError( new Error("No posts found."), ps.page, ps.pageUrl, ps);
 			return self.o_post(ps,posters);
 		}
 	},
