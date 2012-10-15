@@ -5,7 +5,7 @@ models.register({
 	
 	
 	check : function(ps){
-		return (/(regular|photo|quote)/).test(ps.type);
+		return (/(regular|photo|quote|link)/).test(ps.type);
 	},
 
 	post : function(oldps){

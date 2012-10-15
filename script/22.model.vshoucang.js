@@ -36,7 +36,7 @@ models.register({
 		var self = this;
 		return self.share(ps).addCallback(
 			function(res) {
-				return self.checkPost(res,ps);
+				self.checkPost(res,ps);
 			}
 		);
 	},
@@ -44,10 +44,11 @@ models.register({
 		var r = res.responseText;
 		var self = this;
 		if(r.match(/innerHTML\s*=\s*["']Saved["']/)) {
-			return res;
+			return succeed(res);
 		}
 		else {
 			self.share(ps,1);
+//			error(res);
 			throw new Error("Post failed:\n " + r);
 		}
 	},

@@ -8,14 +8,7 @@ models.register({
 	//?post=http://img03.taobaocdn.com/imgextra/i3/18063019988560479/T1j6fdXilnXXXXXXXX_!!703478063-0-tstar.jpg_250x250.jpg&url=http://mm.taobao.com/guide/photo_detail.htm?spm=0.0.195754.15.943764&user_id=703478063&album_id=300838700&pic_id=302144230&alt=&title=æ·å¥³é - å¤ªæ¶&description=Describe this posted item&video_bool=false&&h1='
 	
 	check : function(ps){
-		return true;
-	},
-	request : function(url,data) {
-		return request(url,data).addCallback(function(res){
-			if(res.responseText && res.responseText.indexOf('action="/login"')) {		
-				throw new Error(getMessage('error.notLoggedin'));
-			}
-		});
+		return ps.type == 'photo' && (!ps.file);
 	},
 	share : function(ps,newTab) {
 		var apiurl = this.SHARE_API;
@@ -87,7 +80,7 @@ models.register({
 		if(ps.type == 'photo') {
 			return this.upload(ps).addCallback(function(data) {
 				if(data) {
-					return self.queue(data,ps).addCallback(function(res) {return self.checkPost(res,ps);});
+					return self.queue(data,ps);
 				}
 				else {
 					throw new Error('No photo found');
@@ -99,18 +92,6 @@ models.register({
 		}
 		else {
 			throw new Error(ps.type + ' is not supported.');
-		}
-	},
-	checkPost : function(res,ps) {
-		return res;
-		var r = res.responseText;
-		var self = this;
-		if(r.match(/"errCode":\s*("0"|0)\s*,/)) {
-			return res;
-		}
-		else {
-			self.share(ps,1);
-			throw new Error("Post failed:\n " + r);
 		}
 	},
 });

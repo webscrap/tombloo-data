@@ -6,15 +6,7 @@ models.register({
 	SHARE_API : 'http://www.diandian.com/share',///v2?tmp=' + (+new Date);
 	
 	check : function(ps){
-		return true;
-		return (/(photo|link|quote)/).test(ps.type);
-	},
-	request : function(url,data) {
-		return request(url,data).addCallback(function(res){
-			if(res.responseText && res.responseText.indexOf('action="/login"')) {		
-				throw new Error(getMessage('error.notLoggedin'));
-			}
-		});
+		return (/(photo|link)/).test(ps.type);
 	},
 	share : function(ps,newTab) {
 		var apiurl = this.SHARE_API;
@@ -53,54 +45,27 @@ models.register({
 		return this.share(ps).addCallback(function(res) {
 			var r = res.responseText;
 			var err;
-			var result;
+			var result = {blogid:null,photo:null,formkey:null,referer:self.SHARE_API};
 			if(r) {
-				var blogid;
-				var photo;
-				var formkey;
-			/*
-			//login:
-				if(r.indexOf("diandian.com/login")) {
-					log(r);
-					throw new Error(getMessage('error.notLoggedin'));
-				}
-			*/
 				var m = r.match(/\{value:"([^"]+)",\s*isPrivace:"1"/);
 				if(!m) {
 					m = r.match(/ENV\.blogUrl\s*=\s*'([^']+)/);
 				}
 				if(m) {
-					blogid = m[1];
+					result.blogid = m[1];
 				}
-				else {
-					self.share(ps,1);
-					throw new Error("No post_blog found");
-				}
-				//m = r.match(/{\s*("photo_url"[^}]+)\s*}/);
 				if(ps.type == 'photo') {
 					m = r.match(/{"id":"([^"]+)","desc"/);
 					if(m) {
-						photo = m[1];
-					}
-					else {
-						self.share(ps,1);
-						throw new Error("Upload failed");
+						result.photo = m[1];
 					}
 				}
 				m = r.match(/window.DDformKey\s*=\s*'([^']+)/);
 				if(m) {
-					formkey = m[1];
+					result.formkey = m[1];
 				}
-				else {
-					self.share(ps,1);
-					throw new Error("No formKey found! Request failed.");
-				}
-				return {formkey:formkey,blogid:blogid,photo:photo,referer:self.SHARE_API};
 			}
-			else {
-					self.share(ps,1);
-					throw new Error("Server not responsed.Can't upload the picture");
-			}
+			return result;
 		});
 	},
 	queue : function(data,ps) {
@@ -159,9 +124,6 @@ autoSaveId=5087813
 				sendContent.photos = '[{"id":"' + data.photo + '","desc":"' + ps.item + '"}]';
 				sendContent.type = 'photo';
 			}
-			else {
-				throw new Error(ps.type + ' is not supported.');
-			}
 			return request(actionUrl,{
 				referrer	: data.referer,
 				'X-Requested-With' : 'XMLHttpRequest',
@@ -178,7 +140,7 @@ autoSaveId=5087813
 				var source = xUtils.escapeCode(ps.pageUrl);
 				data.source = source;
 				data.tag = tag;
-				return self.queue(data,ps).addCallback(function(res) {return self.checkPost(res,ps);});
+				return self.queue(data,ps).addCallback(function(res) {self.checkPost(res,ps);});
 			}
 			else {
 				throw new Error('Sharing failed.');
@@ -189,10 +151,14 @@ autoSaveId=5087813
 		var r = res.responseText;
 		var self = this;
 		if(r.match(/"errCode":\s*("0"|0)\s*,/)) {
-			return res;
+			return succeed(res);
+		}
+		else if(ps.quiet) {
+			throw new Error("Post failed:\n " + r);
 		}
 		else {
 			self.share(ps,1);
+		//	error(res);
 			throw new Error("Post failed:\n " + r);
 		}
 	},

@@ -28,7 +28,6 @@ models.register({
 			}	
 		).addCallback(function(res) {
 			var r = res.responseText;
-			log(r);
 			if(r) {
 				var boardid;
 				var token;
