@@ -11,7 +11,7 @@ models.register({
 		//URL=http://apitu.jipin.kaixin001.com/user/me/albums
 		var id = getPref('jipin.id');
 		if(id) {
-			return id;
+			return succeed({id:id});
 		}
 		var aname = getPref('jipin.title');
 		var self = this;
@@ -25,11 +25,11 @@ models.register({
 				if(aname) {
 					for(var i=0;i<albums.list.length;i++) {
 						if(albums.list[i].title.match(aname)) {
-							return albums.list[i].aid;
+							return {id:albums.list[i].aid};
 						}
 					}
 				}
-				return albums.list[0].aid;
+				return {id:albums.list[0].aid};
 			}
 			else {
 				throw new Error('Cound not detect album to post:' + "\n" + getMessage('error.notLoggedin'));
@@ -41,7 +41,7 @@ models.register({
 		var apiurl = self.SHARE_API + 'pin/new';
 		var referrer	= self.SHARE_API + '/remote/remote?xdm_e=' + oldps.pageUrl + '&xdm_c=default8789&xdm_p=1';
 		var ps = modelExt.createPost(oldps,"weheartit");
-//		modelExt.assertFalse(ps,{adult:true,private:true});
+		modelExt.assertFalse(ps,{adult:true,private:true});
 		if(ps.type != 'photo') {
 			throw new Error(ps.type + ' is not supported.');
 		}
@@ -52,7 +52,7 @@ models.register({
 			return request(apiurl, {
 				referrer	: referrer,
 				sendContent	: {
-					aid		: album,
+					aid		: album.id,
 					desc	: desc,
 					url		: ps.pageUrl,
 					siteids : '[]',
@@ -73,10 +73,11 @@ price=
 	},
 	checkPost : function(res,ps) {
 		if(res.status && res.status == 200) {
-			return res;
+			return succeed(res);
 		}
 		else {
 			self.share(ps,1);
+		//	error(res);
 			throw new Error("Post failed:\n" + res.responseText);
 		}
 	},

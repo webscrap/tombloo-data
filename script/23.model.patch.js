@@ -35,6 +35,11 @@ models.Tumblr.post = function(oldps){
 	});
 };
 
+addBefore(Tumblr, 'appendTags', function(form, ps){
+	if(ps.type != 'regular')
+		form['post[state]'] = 2;
+});
+
 
 update(models.WeHeartIt,{
 	check : function(ps){
@@ -42,7 +47,7 @@ update(models.WeHeartIt,{
 	},
 	post : function(oldps){
 		var ps = modelExt.createPost(oldps,'weheartit');
-		//modelExt.assertFalse(ps,{'adult':true,'private':true});
+		modelExt.assertFalse(ps,{'adult':true,'private':true});
 		if(!this.getAuthCookie())
 			return fail(new Error(getMessage('error.notLoggedin')));
 		return request(this.URL + 'create_entry/', {
