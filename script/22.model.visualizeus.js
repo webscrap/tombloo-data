@@ -30,7 +30,7 @@ models.register({
 				referrer		:	dir + '?action=add',
 				//action			:	'add',
 				title			:	ps.item,
-				//description		:	ps.description,
+				description		:	ps.description,
 				referenceURL	:	ps.pageUrl,
 				address			:	ps.itemUrl,
 				tags			:	tag,
@@ -40,7 +40,12 @@ models.register({
 				'nsfw'			:	vnsfw,
 				'public'		:	vpublic,
            },
-        });
+        }).addCallback(function(res){
+			var t = res.responseText;
+			if(t.indexOf('/login')>=0) {
+				throw new Error(getMessage('error.notLoggedin'));
+			}
+		});
 	},
 	
 });
