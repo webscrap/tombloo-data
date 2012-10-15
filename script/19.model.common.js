@@ -199,6 +199,9 @@ var modelExt = {
 				ps.tags.push(ps.type + 'link');
 			}
 		}
+		if(ps.type == 'photo' && ps.pageUrl.match(/^https?:\/\/[^\/]+google\./)) {
+			ps.pageUrl = ps.pageUrl.replace(/&(authuser|oq|gs_l|newwindow|hl|biw|bih|ei)=[^&]*/g,'');
+		}
 		/*if(ps.item) {
 			ps.item = ps.item.replace(/\s+-\s+.*-\s+.*$/,'');
 		}
