@@ -42,6 +42,7 @@ addBefore(Tumblr, 'appendTags', function(form, ps){
 
 
 update(models.WeHeartIt,{
+	URL   : 'https://weheartit.com/',
 	check : function(ps){
 		return ps.type.match(/photo|quote/)  && !ps.file;
 	},

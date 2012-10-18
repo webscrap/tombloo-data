@@ -8,7 +8,7 @@
 		};
     	thismodel.ori_post = thismodel.post;
     	thismodel.post =  function(oldps){
-			var ps = modelExt.createPost(oldps,'delicious');
+			var ps = modelExt.createPost(oldps,'firefox');
 			//var ps = oldps;
 			if(ps.adult) {
 				ps.private = 'true';
@@ -19,8 +19,37 @@
 			else {
 				ps.private = '';//'false';
 			}
-			return thismodel.ori_post(ps);
-		};
+			var self = this;
+			return this.getCurrentUser().addCallback(function(){
+				return request('https://www.delicious.com/save', {
+					queryString : {
+						title : ps.item,
+						url   : ps.itemUrl,
+					}
+				})
+			}).addCallback(function(res){
+				var doc = convertToHTMLDocument(res.responseText);
+				var form = {};
+				items(formContents(doc.documentElement)).forEach(function([key, value]){
+					form[key.replace(/[A-Z]/g, function(c){
+						return '_' + c.toLowerCase()
+					})] = value;
+				});
+				return request('http://www.delicious.com/save', {
+					sendContent : update(form, {
+						title   : ps.item,
+						url     : ps.itemUrl,
+						note    : joinText([ps.body, ps.description], ' ', true),
+						tags    : joinText(ps.tags, ','),
+						private : ps.private,
+					}),
+				});
+			}).addCallback(function(res){
+				res = JSON.parse(res.responseText);
+				if(res.error)
+					throw new Error(res.error_msg);
+			});
+	},
 	thismodel.getSuggestions = function(url){
 		var self = this;
 		var ds = {

@@ -193,6 +193,7 @@ Tombloo.Service.extractors.register({
 		ps.item = image.getAttribute('title');
 		ps.itemUrl = image.getAttribute('src');
 		ps.pageUrl = image.getAttribute('href');
+		ps.page = ps.item;
 		ps.description = image.getAttribute('description');
 		if(image.getAttribute('tags')) {
 			ps.tags = image.getAttribute('tags').split(/\s*,\s*/);
@@ -215,6 +216,7 @@ Tombloo.Service.extractors.register({
 				ps.itemUrl = this.ICON;
 				ps.posts = [];
 				ps.item = ctx.title;
+				ps.page = ctx.title;
 				for(var i=0;i<images.length;i++) {
 					ps.posts.push(this.imageToPost(images[i]));
 				}
@@ -227,16 +229,44 @@ Tombloo.Service.extractors.register({
 
 update(Tombloo.Service, {
 	o_post	:	Tombloo.Service.post,
+	reprError : function(err){
+		// MochiKitの汎用エラーの場合、内部の詳細エラーを使う
+		if(err.name && err.name.match('GenericError'))
+			err = err.message;
+		
+		if(err.status)
+			err = err.message + '(' + err.status + ')';
+		
+		if(typeof(err) != 'object')
+			return '' + err;
+	
+		if(err.channel) {
+			err.channel = "nsIHTTPChannel (HTTP Request Error)";
+		};
+		var msg = [];
+		getAllPropertyNames(err, Object.prototype).forEach(function(prop){
+			var val = err[prop];
+			if(val == null || /(stack|name)/.test(prop) || typeof(val) == 'function')
+				return;
+			
+			if(prop.toLowerCase() === 'filename' || prop === 'location')
+				val = ('' + val).replace(/file:[^ ]+\/(.+?)( |$)/g, '$1');
+			
+			msg.push(prop + ' : ' + val);
+		});
+		
+		return msg.join('\n');
+	},
 	post_next : function(oldps,posters,posts,idx,count) {
-		var doc = oldps.window ? oldps.window.document : null;
 		var post = posts[idx];
 		var self = this;
 		if(idx < count) {
 			idx++;
-			var ps = update({},oldps,post);
+			var ps = {};
+			update(ps,oldps,post);
 			var msg = '[' + idx + '/' + count + '] Posting ' + ps.item + "(" + ps.itemUrl + ") ...";
-			if(doc) {
-				doc.title = msg;
+			if(oldps.window) {
+				oldps.window.document.title = msg;
 			}
 			if(post) {
 				var ds = {};
@@ -266,7 +296,7 @@ update(Tombloo.Service, {
 					
 					if(errs.length)
 						self.alertError(errs.join('\n'), ps.page, ps.pageUrl, ps);
-					return self.post_next(ps,posters,posts,idx,count);
+					return self.post_next(oldps,posters,posts,idx,count);
 				}).addErrback(function(err){
 					self.alertError(err, ps.page, ps.pageUrl, ps);
 					return self.post_next(oldps,posters,posts,idx,count);
@@ -275,9 +305,6 @@ update(Tombloo.Service, {
 			else {
 				return self.post_next(oldps,posters,posts,idx,count);
 			}
-		}
-		else if(doc) {
-			doc.title = oldps.item;
 		}
 		return succeed({});
 	},
@@ -338,7 +365,16 @@ update(Tombloo.Service, {
 		//what_the_f();
 		if(posts && posts.length) {
 			alert("Get " + (posts ? posts.length : '0') + " posts.");
-			return self.post_next(ps,posters,posts,0,posts.length);
+			var doc = ps.window ? ps.window.document : null;
+			var title = '';
+			if(doc) {
+				title = doc.title;
+			}
+			return self.post_next(ps,posters,posts,0,posts.length).addCallback(function(){
+				if(doc && title) {
+					doc.title = title;
+				}
+			});
 		}
 		else {
 			//self.alertError( new Error("No posts found."), ps.page, ps.pageUrl, ps);

@@ -101,6 +101,14 @@ var modelExt = {
 	throwPrivate: function(ps) {
 		return this.assertFalse(ps,{private:true});
 	},
+	throwPost	: function(ps,properties) {
+		for(var i=0;i<properties.length;i++) {
+			var p = properties[i];
+			if(ps[p]) {
+				throw new Error (p + " post not supported.");
+			}
+		}
+	},
 	linkFile: function(ps) {
 		ps.itemUrl = ps.pageUrl;
 		ps.type = 'link';

@@ -45,7 +45,7 @@ models.register({
 		return this.share(ps).addCallback(function(res) {
 			var r = res.responseText;
 			var err;
-			var result = {blogid:null,photo:null,formkey:null,referer:self.SHARE_API};
+			var result = {blogid:null,photo:null,formkey:null,referer:self.SHARE_API,res:res};
 			if(r) {
 				var m = r.match(/\{value:"([^"]+)",\s*isPrivace:"1"/);
 				if(!m) {
@@ -65,7 +65,7 @@ models.register({
 					result.formkey = m[1];
 				}
 			}
-			return result;
+			return succeed(result);
 		});
 	},
 	queue : function(data,ps) {
@@ -94,6 +94,12 @@ autoSaveId=5087813
 */
 
 		if(data) {
+			if(!data.blogid) {
+				throw new Error("Upload failed: No blogid.");
+			}
+			if(!data.formkey) {
+				throw new Error("Upload failed: No formkey.");
+			}
 			var actionUrl = 'http://www.diandian.com/draft/create';
 			var sendContent = {
 					formKey		: data.formkey,
@@ -121,12 +127,17 @@ autoSaveId=5087813
 				sendContent.desc = ps.itemUrl + "\n" + sendContent.desc;
 			}
 			else if(ps.type == 'photo') {
+				if(!data.photo) {
+					throw new Error("Upload failed: No photo.");
+				}
 				sendContent.photos = '[{"id":"' + data.photo + '","desc":"' + ps.item + '"}]';
 				sendContent.type = 'photo';
 			}
 			return request(actionUrl,{
 				referrer	: data.referer,
-				'X-Requested-With' : 'XMLHttpRequest',
+				headers		: {
+					'X-Requested-With' : 'XMLHttpRequest',
+				},
                 sendContent : sendContent,
 			});
 		}
