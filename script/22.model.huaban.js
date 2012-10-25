@@ -52,7 +52,6 @@ models.register({
 		var ps = modelExt.createPost(oldps,'weheartit');
 		modelExt.assertFalse(ps,{'adult':true,'private':true});
 	    var tag = joinText(ps.tags, ',');
-		if(ps.type == 'photo') {
 /*		
 URL=https://huaban.com/pins/
 board_id=799063
@@ -65,41 +64,74 @@ img_url=https://img.ikeepu.com/img/30/11/90/634727053504676223.jpg_500
 link=https://ikeepu.com/
 is_share_btn=
 */
-			return this.getid(ps).addCallback(function(data) {
-				if(data) {
-					var actionUrl = 'https://huaban.com/pins/';
-					return request(actionUrl,{
-						referrer	: data.referer,
-						headers		: {
-							'X-Requested-With' : 'XMLHttpRequest',
-						},
-		                sendContent : {
+/*
+board_id=2700273
+text=âçEè¶è²â å¤§è¸ä¹³ç¥ ééç¾² Iris Chung Colorful æ°åºåè¡£ç¤ºè âå¨çº¿æ­æ¾âä¼é·ç½ï¼è§é¢é«æ¸å¨çº¿è§ç
+via=2
+media_type=1
+video=http://player.youku.com/player.php/sid/XMzExOTA5MzA0/v.swf
+img_url=http://g2.ykimg.com/1100641F464E94783D27E90211A111E8CE0FA2-1005-D6C6-9472-07556AFF4CDC
+link=http://v.youku.com/v_show/id_XMzExOTA5MzA0.html
+share_button=0
+is_share_btn=
+check=true
+*/
+/*
+board_id=2700273
+text=âçEè¶è²â å¤§è¸ä¹³ç¥ ééç¾² Iris Chung Colorful æ°åºåè¡£ç¤ºè âå¨çº¿æ­æ¾âä¼é·ç½ï¼è§é¢é«æ¸å¨çº¿è§ç
+via=2
+media_type=1
+video=http://player.youku.com/player.php/sid/XMzExOTA5MzA0/v.swf
+img_url=http://g2.ykimg.com/1100641F464E94783D27E90211A111E8CE0FA2-1005-D6C6-9472-07556AFF4CDC
+link=http://v.youku.com/v_show/id_XMzExOTA5MzA0.html
+share_button=0
+is_share_btn=
+check=false
+*/
+		return this.getid(ps).addCallback(function(data) {
+			var actionUrl = 'https://huaban.com/pins/';
+			var SC = {
 							board_id	: data.id,
-							//weibo		: 'false',
-							via			: '1',
+							via			: '2',
 							media_type	: '0',
 							video		: '0',
-							img_url		: ps.itemUrl,
 							link		: ps.pageUrl,
 							text		: ps.item + "\n\n" + ps.description,
 							is_share_btn: '',
-							share_button:	'1024',
-						},
-					}).addCallback(function(res){
-						var m = res.responseText.match(/"err":(\d+)\s*,\s*"msg":"([^"]+)/);
-						if(m && m[1]) {
-							throw new Error("Post error [" + m[1] + "] " +  m[2]);
-						}
-					});
+							share_button: 0,
+							check		: 'false',
+				
+			};
+			var HD = {
+				'X-Requested-With' : 'XMLHttpRequest',
+			};
+			if(ps.type == 'video') {
+				if(ps.video) {
+					SC.video = ps.video;
 				}
-				else {
-					throw new Error('No photo found');
+				else if(ps.body) {
+					var m = ps.body.match(/src\s*=\s*"([^"]+)/);
+					SC.video = m[1];
+				}
+				SC.media_type = '1';
+				if(ps.thumb) {
+					SC.img_url = ps.thumb;
+				}
+			}
+			else if(ps.type == 'photo') {
+				SC.img_url = ps.itemUrl;
+			}
+			return request(actionUrl,{
+				referrer	: data.referrer,
+				headers		: HD,
+				sendContent	: SC,
+			}).addCallback(function(res){
+				var m = res.responseText.match(/"err":(\d+)\s*,\s*"msg":"([^"]+)/);
+				if(m && m[1]) {
+						throw new Error("Post error [" + m[1] + "] " +  m[2]);
 				}
 			});
-		}
-		else {
-			throw new Error(ps.type + ' is not supported.');
-		}
+		});
 	},
 	
 });
