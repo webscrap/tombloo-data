@@ -9,7 +9,7 @@ models.register({
 	getAlbum : function(referrer,ps) {
 		//
 		//URL=http://apitu.jipin.kaixin001.com/user/me/albums
-		var id = getPref('jipin.id');
+		var id;// = getPref('jipin.id');
 		if(id) {
 			return succeed({id:id});
 		}
@@ -76,7 +76,6 @@ price=
 		if(res.status && res.status == 200) {
 		}
 		else {
-			self.share(ps,1);
 			throw new Error("Post failed:\n" + res.responseText);
 		}
 	},
