@@ -63,9 +63,16 @@ Tombloo.Service.extractors.register({
 			var baseUrl = ctx.href;
 			var matches = p.getElementsByTagName('img');
 //			alert(matches.length);
+			var posts = [];
 			for(var i = 0;i<matches.length;i++) {
 				var img = matches[i];
-				images.push(resolveRelativePath(img.getAttribute("src"),baseUrl));
+				var src = resolveRelativePath(img.getAttribute("src"),baseUrl);
+				images.push(src);
+				posts.push({
+					itemUrl	: src,
+					type	: 'photo',
+				});
+
 			}
 			if(images.length) {
 				return {
@@ -74,6 +81,7 @@ Tombloo.Service.extractors.register({
 					itemUrl : images[0],
 					type	: 'photo',
 					description : joinText(images,"\n"),
+					posts	: posts,
 					window	: ctx.window,
 				}
 			}
@@ -145,6 +153,7 @@ Tombloo.Service.extractors.register({
 				item    : ctx.title,
 				itemUrl : ctx.href,
 				body    : $x('id("link3")/@value'),
+				video   : $x('id("link2")/@value'),
 				thumb	: thumb,
 			}
 		},
@@ -190,11 +199,11 @@ Tombloo.Service.extractors.register({
 	},
 	imageToPost : function(image) {
 		var ps = {};
-		ps.item = image.getAttribute('title');
+		ps.item = image.getAttribute('title') || image.getAttribute('text') || '';
 		ps.itemUrl = image.getAttribute('src');
 		ps.pageUrl = image.getAttribute('href');
-		ps.page = ps.item;
-		ps.description = image.getAttribute('description');
+		ps.page = ps.item || '';
+		ps.description = image.getAttribute('description') || '';
 		if(image.getAttribute('tags')) {
 			ps.tags = image.getAttribute('tags').split(/\s*,\s*/);
 		}
@@ -260,6 +269,9 @@ update(Tombloo.Service, {
 	post_next : function(oldps,posters,posts,idx,count) {
 		var post = posts[idx];
 		var self = this;
+		if(!posters.length) {
+			return succeed({});
+		}
 		if(idx < count) {
 			idx++;
 			var ps = {};
@@ -289,8 +301,11 @@ update(Tombloo.Service, {
 							var msg = name + ': ' + 
 								(res.message.status? 'HTTP Status Code ' + res.message.status : '\n' + self.reprError(res).indent(4));
 							
-							if(!ignoreError || !msg.match(ignoreError))
+							if(msg.match('HTTP Status Code 504')) {
+							}
+							else if(!ignoreError || !msg.match(ignoreError)){
 								errs.push(msg);
+							}
 						}
 					}
 					
@@ -312,7 +327,10 @@ update(Tombloo.Service, {
 		var self = this;
 		var posts = [];
 		if(ps.posts) {
-			if(ps.description && ps.description.match(/^index:\[/)) {
+			if(!ps.description) {
+				posts = ps.posts;
+			}
+			else if(ps.description.match(/^index:\[/)) {
 				var mch = ps.description.match(/^index:\[([\d\-,\$\s]+)\]\s*(.*)$/);
 				if(mch) {
 					ps.description = mch[2];
@@ -349,11 +367,24 @@ update(Tombloo.Service, {
 					}
 				}
 			}
-			else if(ps.type == 'photo' && ps.description) {
+			else if(ps.description.match(/^(pageUrl|itemUrl|item):\/.+\//)) {
+				var mch = ps.description.match(/^(pageUrl|itemUrl|item):\/(.+)\//); 
+				if(mch) {
+				var prop = mch[1];
+				var regexp = new RegExp(mch[2]);
+				for(var i=0;i<ps.posts.length;i++) {
+					if(ps.posts[i][prop] && ps.posts[i][prop].match(regexp)) {
+						posts.push(ps.posts[i]);
+					}
+				}
+				}
+			}
+			else if(ps.type == 'photo') {
 				var images = ps.description.split("\n");
 				images.forEach(function(img) {
 					posts.push({itemUrl:img,type:'photo'});
 				});
+				ps.description = '';
 			}
 			else {
 				posts = ps.posts;
@@ -364,17 +395,49 @@ update(Tombloo.Service, {
 		//throw new Error("Get " + (posts ? posts.length : '0') + " posts.");
 		//what_the_f();
 		if(posts && posts.length) {
+		/*
+			var poster1 = [];
+			var poster2 = [];
+			for(var i=0;i<posters.length;i++) {
+				if(posters[i].supportPosts) {
+					poster1.push(posters[i]);
+				}
+				else {
+					poster2.push(posters[i]);
+				}
+			}
+		*/
 			alert("Get " + (posts ? posts.length : '0') + " posts.");
+
 			var doc = ps.window ? ps.window.document : null;
 			var title = '';
 			if(doc) {
 				title = doc.title;
 			}
-			return self.post_next(ps,posters,posts,0,posts.length).addCallback(function(){
-				if(doc && title) {
-					doc.title = title;
-				}
-			});
+				return self.post_next(ps,posters,posts,0,posts.length).addCallback(function(){
+					if(doc && title) {
+						doc.title = title;
+					}
+				});
+			
+			/*
+			if(poster1.length) {
+				return self.o_post(ps,poster1).addCallback(function(){
+				return self.post_next(ps,poster2,posts,0,posts.length).addCallback(function(){
+					if(doc && title) {
+						doc.title = title;
+					}
+				});
+				});
+			}
+			else {
+				return self.post_next(ps,poster2,posts,0,posts.length).addCallback(function(){
+					if(doc && title) {
+						doc.title = title;
+					}
+				});
+			}
+			*/
 		}
 		else {
 			//self.alertError( new Error("No posts found."), ps.page, ps.pageUrl, ps);
