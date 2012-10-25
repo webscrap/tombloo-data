@@ -39,7 +39,7 @@ var xUtils = {
 		return '';
 	},
 	toTagText	: function(tags) {
-		if(tags.length) {
+		if(tags && tags.length) {
 			return '#' + joinText(tags, ' #');
 		}
 		return '';
@@ -150,13 +150,12 @@ var modelExt = {
 	},
 	copyPost: function (ps,ext) {
 		var newps = update({},ps);//cloneObject(ps);
-/*		if(ps.tags) {
+		if(ps.tags) {
 			newps.tags = [];
 			for(i in ps.tags) {
 				newps.tags[i] = ps.tags[i];
 			}
 		}
-*/
 		if(ext) {
 			return this.extendPost(newps);
 		}
@@ -214,14 +213,35 @@ var modelExt = {
 			ps.item = ps.item.replace(/\s+-\s+.*-\s+.*$/,'');
 		}
 		*/
+		if(!ps.item) {
+			ps.item = '';
+		}
+		if(!ps.description) {
+			ps.description = '';
+		}
 		ps.extended = true;
 		return ps;
 	},
-	createPost : function(oldps,template) {
-		oldps = this.extendPost(oldps);
+	createPost : function(oldps,template,extent) {
+		this.extendPost(oldps);
 		var ps = this.copyPost(oldps);
-		if(!template) return ps;
+		if(!template) template = '';
 		if(template.match(/weheartit/)) {
+		}
+		if(template.match(/links/)) {
+			if(ps.file) {
+				this.linkFile(ps);
+			}
+			else if(ps.type == 'link') {
+			}
+			else if(ps.type == 'photo') {
+				this.descPhoto(ps);
+				ps.itemUrl = ps.pageUrl;
+			}
+			else {
+				this.linkAll(ps);
+			}
+			ps.type = 'link';
 		}
 		if(template.match(/firefox/)) {
 			if(ps.file)  {
