@@ -923,7 +923,13 @@ models.register({
     },
     download : function(ps) {
         const UPLOAD_AUTH_URI = 'https://plus.google.com/_/upload/photos/resumable?authuser=0';
-        return (ps.file ? succeed(ps.file) : download(ps.itemUrl, getTempDir())).addCallback(function(file) {
+		var targetFile = getTempDir();
+		var filename = createURI(ps.itemUrl).fileName;
+		if(!filename.match(/\.(jpg|jpeg|gif|png|bmp)$/i)) {
+			filename = filename + '.jpg';
+		}
+		targetFile.append(validateFileName(filename));
+        return (ps.file ? succeed(ps.file) : download(ps.itemUrl, targetFile)).addCallback(function(file) {
             let sendContent = JSON.stringify({
                 protocolVersion : '0.8',
                 createSessionRequest : {
