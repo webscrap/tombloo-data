@@ -22,12 +22,12 @@ models.register({
 			type		: type,
 		}
 		if(ps.type == 'photo') {
-			queryString['src[0]'] = ps.itemUrl;
+			queryString['src[0]'] = escape(ps.itemUrl);
 		}
 		if(!newTab) {
 			return request(apiurl, {
 				referrer	: ps.pageUrl || ps.itemUrl,
-				queryString : queryString,
+				sendContent : queryString,
 			});
 		}
 		else {
@@ -44,8 +44,8 @@ models.register({
 		var self = this;
 		return this.share(ps).addCallback(function(res) {
 			var r = res.responseText;
-			var err;
-			var result = {blogid:null,photo:null,formkey:null,referer:self.SHARE_API,res:res};
+			var err = r.match(/<body>([^<]+)/);
+			var result = {blogid:null,photo:null,formkey:null,referer:self.SHARE_API,res:res,msg:(err ? err[1] : '')};
 			if(r) {
 				var m = r.match(/\{value:"([^"]+)",\s*isPrivace:"1"/);
 				if(!m) {
@@ -95,10 +95,10 @@ autoSaveId=5087813
 
 		if(data) {
 			if(!data.blogid) {
-				throw new Error("Upload failed: No blogid.");
+				throw new Error(data.msg || "Upload failed: No blogid.");
 			}
 			if(!data.formkey) {
-				throw new Error("Upload failed: No formkey.");
+				throw new Error(data.msg || "Upload failed: No formkey.");
 			}
 			var actionUrl = 'http://www.diandian.com/draft/create';
 			var sendContent = {
@@ -128,9 +128,9 @@ autoSaveId=5087813
 			}
 			else if(ps.type == 'photo') {
 				if(!data.photo) {
-					throw new Error("Upload failed: No photo.");
+					throw new Error(data.msg || "Upload failed: No photo.");
 				}
-				sendContent.photos = '[{"id":"' + data.photo + '","desc":"' + ps.item + '"}]';
+				sendContent.photos = JSON.stringify([{id:data.photo,desc:ps.item}]);//'[{"id":"' + data.photo + '","desc":"' + ps.item + '"}]';
 				sendContent.type = 'photo';
 			}
 			return request(actionUrl,{
