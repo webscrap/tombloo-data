@@ -23,7 +23,7 @@ models.register({
 		if(!newTab) {
 			return request(apiurl, {
 				referrer	: ps.pageUrl || ps.itemUrl,
-				queryString : queryString,
+				sendContent : queryString,
 			});
 		}
 		else {
@@ -63,13 +63,17 @@ models.register({
 		if(data) {
 			var actionUrl = self.SHARE_API;
 			update(data,{
+				wb_image	: ps.itemUrl,
+				wb_url		: ps.pageUrl,
 				wb_org_desc	: '-',
 				wb_desc		: ps.item,
 				wb_title	: (ps.description ? ps.description + "\n\n" + tag_text : tag_text),
 			});
 			return request(actionUrl,{
 				referrer	: data.wb_url,
-				'X-Requested-With' : 'XMLHttpRequest',
+				headers		: {
+					'X-Requested-With' : 'XMLHttpRequest',
+				},
                 sendContent : data,
 			});
 		}
