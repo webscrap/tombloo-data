@@ -59,28 +59,23 @@ Tombloo.Service.extractors.register({
 				}
 			}	
 			var images = new Array;
-//			var re = /<img[^>]+src="([^"]+)"/g;
 			var baseUrl = ctx.href;
 			var matches = p.getElementsByTagName('img');
-//			alert(matches.length);
 			var posts = [];
 			for(var i = 0;i<matches.length;i++) {
 				var img = matches[i];
 				var src = resolveRelativePath(img.getAttribute("src"),baseUrl);
-				images.push(src);
 				posts.push({
 					itemUrl	: src,
 					type	: 'photo',
 				});
 
 			}
-			if(images.length) {
+			if(posts.length) {
 				return {
-					images	: images,
 					item	: ctx.title,
-					itemUrl : images[0],
+					itemUrl : posts[0].itemUrl,
 					type	: 'photo',
-					description : joinText(images,"\n"),
 					posts	: posts,
 					window	: ctx.window,
 				}
@@ -266,181 +261,127 @@ update(Tombloo.Service, {
 		
 		return msg.join('\n');
 	},
-	post_next : function(oldps,posters,posts,idx,count) {
-		var post = posts[idx];
+	delayPost : function(delay,ps,posters,doc,title) {
+		var self = this;
+		if(doc && title) {
+			setTimeout(function(){
+				doc.title = title;
+				self.o_post(ps,posters);
+			},delay);
+		}
+		else {
+			setTimeout(function() {
+				self.o_post(ps,posters);
+			},delay);
+		}
+	},
+	queuePost	: function(oldps,posters,posts,idx,count) {
+		var DELAY = 20000;
 		var self = this;
 		if(!posters.length) {
+			alert("Nothing to post");
 			return succeed({});
 		}
-		if(idx < count) {
-			idx++;
-			var ps = {};
-			update(ps,oldps,post);
-			var msg = '[' + idx + '/' + count + '] Posting ' + ps.item + "(" + ps.itemUrl + ") ...";
-			if(oldps.window) {
-				oldps.window.document.title = msg;
+		var delay = 0;
+		var doc = oldps.window ? oldps.window.document : null;
+		if(doc) {
+			for(var i=0;i<count;i++) {
+				var ps = update({},oldps,posts[i]);
+				var msg = '[' + (i+1) + '/' + count + '] Posting ' + ps.item + "(" + ps.itemUrl + ") ...";
+				self.delayPost(delay,ps,posters,doc,msg);
+				delay += DELAY;
 			}
-			if(post) {
-				var ds = {};
-				posters = [].concat(posters);
-				posters.forEach(function(p){
-					try{
-						ds[p.name] = (ps.favorite && RegExp('^' + ps.favorite.name + '(\\s|$)').test(p.name))? p.favor(ps) : p.post(ps);
-					} catch(e){
-						ds[p.name] = fail(e);
-					}
-				});
-				
-				return new DeferredHash(ds).addCallback(function(ress){
-					var errs = [];
-					var ignoreError = getPref('ignoreError');
-					ignoreError = ignoreError && new RegExp(getPref('ignoreError'), 'i');
-					for(var name in ress){
-						var [success, res] = ress[name];
-						if(!success){
-							var msg = name + ': ' + 
-								(res.message.status? 'HTTP Status Code ' + res.message.status : '\n' + self.reprError(res).indent(4));
-							
-							if(msg.match('HTTP Status Code 504')) {
-							}
-							else if(!ignoreError || !msg.match(ignoreError)){
-								errs.push(msg);
-							}
-						}
-					}
-					
-					if(errs.length)
-						self.alertError(errs.join('\n'), ps.page, ps.pageUrl, ps);
-					return self.post_next(oldps,posters,posts,idx,count);
-				}).addErrback(function(err){
-					self.alertError(err, ps.page, ps.pageUrl, ps);
-					return self.post_next(oldps,posters,posts,idx,count);
-				});
-			}	
-			else {
-				return self.post_next(oldps,posters,posts,idx,count);
+			setTimeout(function(){
+				doc.title = oldps.item;
+			},delay);
+		}
+		else {
+			for(var i=0;i<count;i++) {
+				self.delayPost(delay,update({},oldps,posts[i]),posters);	
+				delay += DELAY;
 			}
 		}
 		return succeed({});
 	},
-	post	:	function(ps,posters) {
-		var self = this;
+	descExp	:	function(ps) {
+		var exp = ps.description;
 		var posts = [];
-		if(ps.posts) {
-			if(!ps.description) {
-				posts = ps.posts;
-			}
-			else if(ps.description.match(/^index:\[/)) {
-				var mch = ps.description.match(/^index:\[([\d\-,\$\s]+)\]\s*(.*)$/);
-				if(mch) {
-					ps.description = mch[2];
-					var indexs = mch[1].split(/\s*,\s*/);
-					for(var i=0;i<indexs.length;i++) {
-						var t = indexs[i];
-						var m = t.match(/^\s*(\d+)\s*-\s*(\d+|\$)\s*$/);
-						var s;
-						var e;
-						if(m) {
-							s = +m[1];
-							e = m[2];
-							if(e == '$') {
-								e = ps.posts.length - 1;
-							}
-							else {
-								e = +e;
-							}
+		if(!exp) {
+			return ps.posts;
+		}
+		else if(exp.match(/^index:\[/)) {
+			var mch = exp.match(/^index:\[([\d\-,\$\s]+)\]\s*(.*)$/);
+			if(mch) {
+				exp = mch[2];
+				var indexs = mch[1].split(/\s*,\s*/);
+				for(var i=0;i<indexs.length;i++) {
+					var t = indexs[i];
+					var m = t.match(/^\s*(\d+)\s*-\s*(\d+|\$)\s*$/);
+					var s;
+					var e;
+					if(m) {
+						s = +m[1];
+						e = m[2];
+						if(e == '$') {
+							e = ps.posts.length - 1;
 						}
 						else {
-							t = t.replace(/^\s+/,'');
-							t = t.replace(/\s+$/,'');
-							if(t.match(/^\d+$/)) {
-								s = +t;
-								e = +t;
-							}
-							else {
-								continue;
-							}
+							e = +e;
 						}
-						for(var a=s;a<=e;a++) {
-							posts.push(ps.posts[a]);
+					}
+					else {
+						t = t.replace(/^\s+/,'');
+						t = t.replace(/\s+$/,'');
+						if(t.match(/^\d+$/)) {
+							s = +t;
+							e = +t;
 						}
+						else {
+							continue;
+						}
+					}
+					for(var a=s;a<=e;a++) {
+						posts.push(ps.posts[a]);
 					}
 				}
 			}
-			else if(ps.description.match(/^(pageUrl|itemUrl|item):\/.+\//)) {
-				var mch = ps.description.match(/^(pageUrl|itemUrl|item):\/(.+)\//); 
-				if(mch) {
+		}
+		else if(exp.match(/^(pageUrl|itemUrl|item):\/.+\//)) {
+			var mch = exp.match(/^(pageUrl|itemUrl|item):\/(.+)\/\s*(.*)\s*$/); 
+			if(mch) {
 				var prop = mch[1];
 				var regexp = new RegExp(mch[2]);
+				exp = mch[3];
 				for(var i=0;i<ps.posts.length;i++) {
 					if(ps.posts[i][prop] && ps.posts[i][prop].match(regexp)) {
 						posts.push(ps.posts[i]);
 					}
 				}
-				}
 			}
-			else if(ps.type == 'photo') {
-				var images = ps.description.split("\n");
-				images.forEach(function(img) {
-					posts.push({itemUrl:img,type:'photo'});
-				});
-				ps.description = '';
+		}
+		else {
+			return ps.posts;
+		}
+		ps.description = exp;
+		return posts;
+	},
+	post	:	function(ps,posters) {
+		var self = this;
+		var posts = [];
+		if(ps.posts) {
+			if(ps.description) {
+				posts = self.descExp(ps);
 			}
 			else {
 				posts = ps.posts;
 			}
 		}
 		ps.posts = null;
-		//alert("Get " + (posts ? posts.length : '0') + " posts.");
-		//throw new Error("Get " + (posts ? posts.length : '0') + " posts.");
-		//what_the_f();
-		if(posts && posts.length) {
-		/*
-			var poster1 = [];
-			var poster2 = [];
-			for(var i=0;i<posters.length;i++) {
-				if(posters[i].supportPosts) {
-					poster1.push(posters[i]);
-				}
-				else {
-					poster2.push(posters[i]);
-				}
-			}
-		*/
-			alert("Get " + (posts ? posts.length : '0') + " posts.");
-
-			var doc = ps.window ? ps.window.document : null;
-			var title = '';
-			if(doc) {
-				title = doc.title;
-			}
-				return self.post_next(ps,posters,posts,0,posts.length).addCallback(function(){
-					if(doc && title) {
-						doc.title = title;
-					}
-				});
-			
-			/*
-			if(poster1.length) {
-				return self.o_post(ps,poster1).addCallback(function(){
-				return self.post_next(ps,poster2,posts,0,posts.length).addCallback(function(){
-					if(doc && title) {
-						doc.title = title;
-					}
-				});
-				});
-			}
-			else {
-				return self.post_next(ps,poster2,posts,0,posts.length).addCallback(function(){
-					if(doc && title) {
-						doc.title = title;
-					}
-				});
-			}
-			*/
+		if(posts) {
+			//alert("Get " + (posts ? posts.length : '0') + " posts.");
+			return self.queuePost(ps,posters,posts,0,posts.length);
 		}
 		else {
-			//self.alertError( new Error("No posts found."), ps.page, ps.pageUrl, ps);
 			return self.o_post(ps,posters);
 		}
 	},
