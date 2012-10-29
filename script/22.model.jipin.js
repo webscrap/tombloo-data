@@ -41,7 +41,7 @@ models.register({
 		var apiurl = self.SHARE_API + 'pin/new';
 		var referrer	= self.SHARE_API + '/remote/remote?xdm_e=' + oldps.pageUrl + '&xdm_c=default8789&xdm_p=1';
 		var ps = modelExt.createPost(oldps,"weheartit");
-		modelExt.throwPost(ps, ["adult","private"]);
+//		modelExt.throwPost(ps, ["adult","private"]);
 		if(ps.type != 'photo') {
 			throw new Error(ps.type + ' is not supported.');
 		}
@@ -73,10 +73,14 @@ price=
 			
 	},
 	checkPost : function(res,ps) {
-		if(res.status && res.status == 200) {
+		var t = res.responseText;
+		if(!t) {
+			return;
 		}
-		else {
-			throw new Error("Post failed:\n" + res.responseText);
+		var m = t.match(/"errno":\d+\s*,\s*"error":"([^"]+)/);
+		if(m) {
+			throw new Error("Post failed: " + m[1]);
 		}
+		return;
 	},
 });

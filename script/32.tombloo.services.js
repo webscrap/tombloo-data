@@ -303,6 +303,61 @@ update(Tombloo.Service, {
 		}
 		return succeed({});
 	},
+	postNext : function(oldps,posters,posts,idx,count) {
+		var self = this;
+		if(!posters.length) {
+			alert("No posters for posting");
+			return succeed({});
+		}
+		if(idx >= count) {
+			return succeed({});
+		}
+		var doc = oldps.window ? oldps.window.document : null;
+		if(!posts[idx]) {
+			return succeed({});
+		}
+		var ps = update({},oldps,posts[idx]);
+
+		idx++;
+
+		if(doc) {
+			var msg = '[' + idx + '/' + count + '] Posting ' + ps.item + "(" + ps.itemUrl + ") ...";
+			doc.title = msg;
+		}
+		var ds = {};
+		posters = [].concat(posters);
+		posters.forEach(function(p){
+			try{
+				ds[p.name] = (ps.favorite && RegExp('^' + ps.favorite.name + '(\\s|$)').test(p.name))? p.favor(ps) : p.post(ps);
+			} catch(e){
+				ds[p.name] = fail(e);
+			}
+		});
+		return new DeferredHash(ds).addCallback(function(ress){
+			debug(ress);
+			var errs = [];
+			var ignoreError = getPref('ignoreError');
+			ignoreError = ignoreError && new RegExp(getPref('ignoreError'), 'i');
+			for(var name in ress){
+				var [success, res] = ress[name];
+				if(!success){
+					var msg = name + ': ' + 
+						(res.message.status? 'HTTP Status Code ' + res.message.status : '\n' + self.reprError(res).indent(4));
+					
+					if(!ignoreError || !msg.match(ignoreError))
+						errs.push(msg);
+				}
+			}
+			setTimeout(function() {
+				if(doc) {
+					doc.title = oldps.item;
+				}
+				return self.postNext(oldps,posters,posts,idx,count);
+			},2000);
+			if(errs.length)
+				self.alertError(errs.join('\n'), ps.page, ps.pageUrl, ps);
+		});
+	},
 	descExp	:	function(ps) {
 		var exp = ps.description;
 		var posts = [];
@@ -368,7 +423,7 @@ update(Tombloo.Service, {
 	post	:	function(ps,posters) {
 		var self = this;
 		var posts = [];
-		if(ps.posts) {
+		if(ps.posts && ps.posts.length) {
 			if(ps.description) {
 				posts = self.descExp(ps);
 			}
@@ -376,10 +431,17 @@ update(Tombloo.Service, {
 				posts = ps.posts;
 			}
 		}
+		else {
+			posts = null;
+		}
 		ps.posts = null;
 		if(posts) {
-			//alert("Get " + (posts ? posts.length : '0') + " posts.");
-			return self.queuePost(ps,posters,posts,0,posts.length);
+			if(confirm("Post " + (posts ? posts.length : '0') + " posts? ")) {
+				return self.queuePost(ps,posters,posts,0,posts.length);
+			}
+			else {
+				return succeed({});
+			}
 		}
 		else {
 			return self.o_post(ps,posters);

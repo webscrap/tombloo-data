@@ -46,7 +46,7 @@ models.register({
 			[file.path],
 			1
 			);
-		return succeed();
+		return succeed({});
 	},
 });
 
