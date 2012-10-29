@@ -20,7 +20,7 @@ models.register({
 				referrer	: ps.pageUrl || ps.itemUrl,
 				queryString : {
 					media		: ps.itemUrl,
-					url			: ps.pageUrl,
+					url			: (ps.pageUrl.match('google.com') ? 'http://www.cctv.com' : ps.pageUrl),
 					title		: ps.item,
 					is_video	: ps.type == 'video' ? 'true' : 'false',
 					description	: ps.description,
