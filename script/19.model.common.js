@@ -209,10 +209,11 @@ var modelExt = {
 		if(ps.type == 'photo' && ps.pageUrl.match(/^https?:\/\/[^\/]+google\./)) {
 			ps.pageUrl = ps.pageUrl.replace(/&(authuser|oq|gs_l|newwindow|hl|biw|bih|ei)=[^&]*/g,'');
 		}
-		/*if(ps.item) {
-			ps.item = ps.item.replace(/\s+-\s+.*-\s+.*$/,'');
-		}
-		*/
+		['itemUrl','pageUrl'].forEach(function(p) {
+			if(ps[p]) {
+				ps[p].replace(/livedoor\.blogimg\.jp/g,'image.blog.livedoor.jp');
+			}
+		});
 		if(!ps.item) {
 			ps.item = '';
 		}
@@ -333,5 +334,12 @@ var modelExt = {
 			alert('No model named ' + ModelName + ' for pre processing.');
 			return false;
 		}
+	},
+	safeUrl : function(url) {
+		if(url) {
+			url = url.replace(/livedoor\.blogimg.jp/g,'image.blog.livedoor.jp');
+			url = url.replace(/google\.com|facebook\.com|twitter\.com|twitpic\.com/g,'cctv.com');
+		}
+		return url;
 	},
 };

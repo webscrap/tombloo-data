@@ -317,46 +317,22 @@ update(Tombloo.Service, {
 			return succeed({});
 		}
 		var ps = update({},oldps,posts[idx]);
-
 		idx++;
-
+		var d = self.o_post(ps,posters);
 		if(doc) {
 			var msg = '[' + idx + '/' + count + '] Posting ' + ps.item + "(" + ps.itemUrl + ") ...";
 			doc.title = msg;
-		}
-		var ds = {};
-		posters = [].concat(posters);
-		posters.forEach(function(p){
-			try{
-				ds[p.name] = (ps.favorite && RegExp('^' + ps.favorite.name + '(\\s|$)').test(p.name))? p.favor(ps) : p.post(ps);
-			} catch(e){
-				ds[p.name] = fail(e);
-			}
-		});
-		return new DeferredHash(ds).addCallback(function(ress){
-			debug(ress);
-			var errs = [];
-			var ignoreError = getPref('ignoreError');
-			ignoreError = ignoreError && new RegExp(getPref('ignoreError'), 'i');
-			for(var name in ress){
-				var [success, res] = ress[name];
-				if(!success){
-					var msg = name + ': ' + 
-						(res.message.status? 'HTTP Status Code ' + res.message.status : '\n' + self.reprError(res).indent(4));
-					
-					if(!ignoreError || !msg.match(ignoreError))
-						errs.push(msg);
-				}
-			}
-			setTimeout(function() {
-				if(doc) {
-					doc.title = oldps.item;
-				}
+			d.addBoth(function(){
+				doc.title = oldps.item;
 				return self.postNext(oldps,posters,posts,idx,count);
-			},2000);
-			if(errs.length)
-				self.alertError(errs.join('\n'), ps.page, ps.pageUrl, ps);
-		});
+			});
+		}
+		else {
+			d.addBoth(function(){
+				return self.postNext(oldps,posters,posts,idx,count);
+			});
+		}
+		return d;
 	},
 	descExp	:	function(ps) {
 		var exp = ps.description;

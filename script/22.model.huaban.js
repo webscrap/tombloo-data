@@ -30,7 +30,7 @@ models.register({
 					var boards = JSON.parse(m[1]);
 					if(boards.length) {
 						id = boards[0].board_id;
-						for(var i=0;i<boards.length;i++) {
+						for(var i=0;target && i<boards.length;i++) {
 							if(boards[i].title.match(target)) {
 								id = boards[i].board_id;
 								break;

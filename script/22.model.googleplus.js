@@ -667,7 +667,7 @@ models.register({
 		var target = getPref('googleplus.circles');
 		//alert('circles regexp: ' + target);
 		if(!target) {
-			return [];
+			return succeed([]);
 		}
 		return gplus.getInitialData(12).addCallback(function(data) {
 	        let circles = [];
@@ -851,6 +851,17 @@ models.register({
             delete ps.googlePlusQuoteText;
         }
     },
+
+	postForm : function(fn){
+		var self = this;
+		var d = succeed();
+		d.addCallback(fn);
+		d.addCallback(function(res){
+			var url = res.channel.URI.asciiSpec;
+			return;
+		});
+		return d;
+	},
     post : function(oldps) {
         let self = this, ps = modelExt.createPost(oldps);
         if (!this.getAuthCookie()) {
@@ -868,15 +879,17 @@ models.register({
 		else {
 			ps.description = ps.description + "\n\n" + tagtext;
 		}
-        return this.getOZData().addCallback(function(oz) {
-			return self.getCircles().addCallback(function(circles){
-	            return self._post(ps, oz, circles);
-			})
-        });
+        return this.postForm(function() {
+			return self.getOZData().addCallback(function(oz) {
+				return self.getCircles().addCallback(function(circles){
+		            return self._post(ps, oz, circles);
+				})
+			});
+		});
     },
     _post : function(ps, oz, circles) {
         let self = this, spar, link, description;
-        return this.upload(ps, oz).addCallback(function() {
+        return self.upload(ps, oz).addCallback(function() {
             if (ps.type === 'regular') {
                 description = joinText([ps.item, ps.description], '\n\n');
             } else {

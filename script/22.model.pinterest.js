@@ -19,8 +19,8 @@ models.register({
 		return request(apiurl, {
 				referrer	: ps.pageUrl || ps.itemUrl,
 				queryString : {
-					media		: ps.itemUrl,
-					url			: (ps.pageUrl.match('google.com') ? 'http://www.cctv.com' : ps.pageUrl),
+					media		: modelExt.safeUrl(ps.itemUrl),
+					url			: modelExt.safeUrl(ps.pageUrl),
 					title		: ps.item,
 					is_video	: ps.type == 'video' ? 'true' : 'false',
 					description	: ps.description,
@@ -29,15 +29,18 @@ models.register({
 		).addCallback(function(res) {
 			var r = res.responseText;
 			if(r) {
-				var boardid;
+				var boardid = getPref('model.pinterest.defaultBoard');
 				var token;
 				var form_url;
-				var m = r.match(/id="id_board"[^>]+value="(\d+)"/);
-				if(m) {
-					boardid = m[1];
-				}
-				else {
-					throw new Error("No BOARD found for posting");
+				var m;
+				if(!boardid) {
+					 m = r.match(/id="id_board"[^>]+value="(\d+)"/);
+					if(m) {
+						boardid = m[1];
+					}
+					else {
+						throw new Error("No BOARD found for posting");
+					}
 				}
 				//m = r.match(/{\s*("photo_url"[^}]+)\s*}/);
 				m = r.match(/name='csrfmiddlewaretoken'[^>]+value='([^']+)/);
@@ -63,7 +66,7 @@ models.register({
 	},
 	post : function(oldps){
 		var ps = modelExt.createPost(oldps,'weheartit');
-		modelExt.assertFalse(ps,{'adult':true,'private':true});
+	//	modelExt.assertFalse(ps,{'adult':true,'private':true});
 	    var tag = joinText(ps.tags, ',');
 		var tag_text = joinText(ps.tags,' #');
 		if(tag_text) {
