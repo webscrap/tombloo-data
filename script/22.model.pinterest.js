@@ -29,7 +29,7 @@ models.register({
 		).addCallback(function(res) {
 			var r = res.responseText;
 			if(r) {
-				var boardid = getPref('model.pinterest.defaultBoard');
+				var boardid = getPref('target.pinterest');
 				var token;
 				var form_url;
 				var m;

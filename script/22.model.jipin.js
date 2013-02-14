@@ -13,7 +13,7 @@ models.register({
 		if(id) {
 			return succeed({id:id});
 		}
-		var aname = getPref('jipin.title');
+		var aname = getPref('target.jipin');
 		var self = this;
 		var apiurl = this.SHARE_API + 'user/me/albums';
 		return request(apiurl,{

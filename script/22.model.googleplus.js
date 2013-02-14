@@ -664,7 +664,7 @@ models.register({
 
 	getCircles : function() {
 		var gplus = this;
-		var target = getPref('googleplus.circles');
+		var target = getPref('target.googleplus');
 		//alert('circles regexp: ' + target);
 		if(!target) {
 			return succeed([]);

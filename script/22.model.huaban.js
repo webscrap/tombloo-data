@@ -21,7 +21,7 @@ models.register({
 				},
 			}	
 		).addCallback(function(res) {
-			var target = getPref("target.huaban.com");
+			var target = getPref("target.huaban");
 			var id;
 			var r = res.responseText;
 			if(r) {
