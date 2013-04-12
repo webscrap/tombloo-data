@@ -88,6 +88,6 @@ update(models.FirefoxBookmark,{
 		return succeed(this.addBookmark(ps.itemUrl, ps.item, ps.tags, ps.description));
 	},
 });
-['Readability','Instapaper'].forEach(function(name,idx) {
+['Readability','Instapaper','HatenaBookmark'].forEach(function(name,idx) {
 	modelExt.hookModel(name,'links',/photo|quote|link|video|regular/);
 });
