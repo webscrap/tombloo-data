@@ -53,8 +53,8 @@
 	thismodel.getSuggestions = function(url){
 		var self = this;
 		var ds = {
-			tags : this.getUserTags(),
-			suggestions : this.getCurrentUser().addCallback(function(){
+			tags : self.getUserTags(),
+			suggestions : self.getCurrentUser().addCallback(function(){
 				return getPref('model.delicious.prematureSave')? 
 					request('https://www.delicious.com/save', {
 						queryString : {

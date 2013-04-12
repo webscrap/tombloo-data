@@ -344,11 +344,11 @@ function toPlainText(text) {
         };
         // <strong>は無視されるため <b> に変換
         s = indent(s).replace(re.bold, '<b$1>$2</b>');
-        tags = stringify(<>
+        tags = stringify(commentToText(function(){/*
             a b strong s strike kbd em acronym
             q blockquote ins del sub sup u dfn
             i abbr cite font img ruby rb rt rp
-        </>).trim().split(re.split);
+        */})).trim().split(re.split);
         p = '';
         do {
             p += '~' + Math.random().toString(36).slice(-1);
