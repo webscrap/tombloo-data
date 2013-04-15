@@ -44,7 +44,7 @@ addBefore(Tumblr, 'appendTags', function(form, ps){
 update(models.WeHeartIt,{
 	URL   : 'https://weheartit.com/',
 	check : function(ps){
-		return ps.type.match(/photo|quote/)  && !ps.file;
+		return ps.type && ps.type.match(/photo|quote/)  && !ps.file;
 	},
 	post : function(oldps){
 		var ps = modelExt.createPost(oldps,'weheartit');
@@ -69,6 +69,7 @@ update(models.WeHeartIt,{
 	},
 });
 
+/*
 update(models.FirefoxBookmark,{
 	check	: function(ps) {
 		return ps.type.match(/photo|quote|link|video|regular/);
@@ -88,6 +89,7 @@ update(models.FirefoxBookmark,{
 		return succeed(this.addBookmark(ps.itemUrl, ps.item, ps.tags, ps.description));
 	},
 });
+*/
 ['Readability','Instapaper','HatenaBookmark'].forEach(function(name,idx) {
 	modelExt.hookModel(name,'links',/photo|quote|link|video|regular/);
 });

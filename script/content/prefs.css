@@ -1,0 +1,84 @@
+tab {
+	padding : 0.4em 0.8em 0.1em 0.8em;
+}
+
+tabpanel {
+	padding : 1.2em 0.7em;
+}
+
+checkbox, radio, button, tab {
+	cursor : pointer;
+}
+
+/* コピーできるラベルとして利用 */
+textbox[readonly=true] {
+	-moz-appearance : none;
+	-moz-user-focus : ignore !important;
+	-moz-border-bottom-colors : transparent !important;
+	-moz-border-left-colors : transparent !important;
+	-moz-border-right-colors : transparent !important;
+	-moz-border-top-colors : transparent !important;
+	background-color : transparent !important;
+}
+
+
+#posters {
+	width : 48em;
+}
+
+#posters treecol hbox{
+	-moz-box-align : center;
+	-moz-box-pack : center;
+	align : center;
+	width : 3.5em;
+	
+	/* Macで列ヘッダーの高さが広がらない問題に対応 */
+	height : 3.5em;
+}
+
+#posters treechildren::-moz-tree-image {
+	margin-left : 0.5em;
+}
+
+#posters treechildren::-moz-tree-cell-text {
+	margin-left : 0.5em;
+}
+
+#posters treechildren::-moz-tree-row {
+	height : 2.5em !important;
+}
+
+#posters treechildren::-moz-tree-image(default) {
+	list-style-image : url('chrome://tombloo/skin/default.png');
+}
+
+#posters treechildren::-moz-tree-image(enabled) {
+	/* 透明度の設定はできない */
+	list-style-image : url('chrome://tombloo/skin/enabled.png');
+}
+
+#posters treechildren::-moz-tree-image(disabled) {
+	list-style-image : url('chrome://tombloo/skin/disabled.png');
+}
+
+
+/* 選択行のハイライトを無効に */
+#posters treechildren::-moz-tree-cell-text(selected) {
+	font-weight : normal !important;
+	color : inherit !important;
+}
+
+#posters treechildren::-moz-tree-row(selected, current, focus),
+#posters treechildren::-moz-tree-row(current, focus) ,
+#posters treechildren::-moz-tree-row(selected, focus),
+#posters treechildren::-moz-tree-row(selected) {
+	border-color : transparent !important;
+	background-color : -moz-Field !important;
+	background-image : none !important;
+}
+
+/* 交互に色分けし見やすく */
+#posters treechildren::-moz-tree-row(selected, even),
+#posters treechildren::-moz-tree-row(even) {
+	background-color : #F3F3F3 !important;
+}

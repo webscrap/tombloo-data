@@ -68,24 +68,30 @@ description=DESC
             });
         }
 		else if (ps.type == 'video') {
-			var embed = ps.body;
-			var dom = convertToHTMLDocument(embed); 
-			embed = dom.getElementsByTagName('embed')[0];
-			if(!embed) {
-				embed = dom.getElementsByTagName('object')[0];
+			var url = '';
+			if(ps.video) {
+				url = ps.video;
 			}
-			//url=http://static.youku.com/v1.0.0188/v/swf/player.swf||VideoIDS=XMzAxMzQ0NTMy&ShowId=0&Cp=0&Light=on&THX=off&Tid=0&isAutoPlay=true&Version=/v1.0.0705&show_ce=1&winType=interior
-			var url = embed.getAttribute('src') + '||';
-			var attrs = new Array();
-			for(var i=0;i<embed.attributes.length;i++) {
-				var attr = embed.attributes[i];
-				if(attr.name.match(/src/)) {
+			else {
+				var embed = ps.body;
+				var dom = convertToHTMLDocument(embed); 
+				embed = dom.getElementsByTagName('embed')[0];
+				if(!embed) {
+					embed = dom.getElementsByTagName('object')[0];
 				}
-				else {
-					attrs.push(attr.name + '=' + attr.value);
+				//url=http://static.youku.com/v1.0.0188/v/swf/player.swf||VideoIDS=XMzAxMzQ0NTMy&ShowId=0&Cp=0&Light=on&THX=off&Tid=0&isAutoPlay=true&Version=/v1.0.0705&show_ce=1&winType=interior
+				var url = embed.getAttribute('src') + '||';
+				var attrs = new Array();
+				for(var i=0;i<embed.attributes.length;i++) {
+					var attr = embed.attributes[i];
+					if(attr.name.match(/src/)) {
+					}
+					else {
+						attrs.push(attr.name + '=' + attr.value);
+					}
 				}
+				url = url + attrs.join('&');
 			}
-			url = url + attrs.join('&');
             return this.request(actionUrl, {
                 referrer    : ps.pageUrl,
 				sendContent : {

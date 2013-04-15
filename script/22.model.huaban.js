@@ -105,7 +105,7 @@ check=false
 			var HD = {
 				'X-Requested-With' : 'XMLHttpRequest',
 			};
-			if(ps.type == 'video') {
+			if(ps.type == 'video' && ps.thumb) {
 				if(ps.video) {
 					SC.video = ps.video;
 				}
@@ -120,6 +120,9 @@ check=false
 			}
 			else if(ps.type == 'photo') {
 				SC.img_url = ps.itemUrl;
+			}
+			else {
+				throw new Error("No support post type: " + ps.type);
 			}
 			return request(actionUrl,{
 				referrer	: data.referrer,

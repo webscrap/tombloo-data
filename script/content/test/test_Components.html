@@ -1,0 +1,163 @@
+<html>
+<head>
+	<script type="text/javascript" src="library/MochiKit.js"></script>
+	<script type="text/javascript" src="library/SimpleTest.js"></script>
+	<script type="text/javascript" src="test.js"></script>
+	<link rel="stylesheet" type="text/css" href="library/test.css">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+
+<pre id="test">
+</pre>
+<script type="text/javascript; version=1.8" src="../library/00_MochiKit.js"></script>
+<script type="text/javascript; version=1.8" src="../library/00_prototype.js"></script>
+<script type="text/javascript; version=1.8" src="../library/00_component.js"></script>
+<script type="text/javascript; version=1.8" >
+try {
+	// chrome://tombloo/content/test/test_Components.html
+	
+	// createMock
+	var BaseWebProgressListener = createMock('@mozilla.org/appshell/component/browser-status-filter;1');
+	ok(BaseWebProgressListener.STATE_TRANSFERRING);
+	
+	var listner = new BaseWebProgressListener();
+	ok(listner);
+	is(listner.STATE_TRANSFERRING, BaseWebProgressListener.STATE_TRANSFERRING);
+	is(listner.QueryInterface(Ci.nsIWebProgressListener), listner);
+	ok(! (listner instanceof Ci.nsIWebProgressListener), 'createMockで生成したオブジェクトはinstanceofが通らない');
+	
+	// createQueryInterface
+	var mock = {QueryInterface : createQueryInterface([Ci.nsIScriptError])};
+	is(mock.QueryInterface(Ci.nsIScriptError), mock);
+	try{
+		mock.QueryInterface(ILocalFile);
+	} catch (e){
+		is(e, Components.results.NS_NOINTERFACE);
+	}
+	
+	// createConstructor
+	var str = 'ABCD';
+	is(new InputStream(new StringInputStream(str)).read(str.length), 'ABCD');
+	
+	// getInterfaces
+	var uri = createURI('http://google.com');
+	var ifcs = getInterfaces(uri);
+	ok(ifcs.length >= 6, 'getInterfaces: インタフェース数(Firefox 2/3で違う)');
+	
+	
+	// broad
+	var uri = createURI('http://google.com');
+	var channel = broad(IOService.newChannelFromURI(uri));
+	ok(channel.setRequestHeader != null) // nsIHttpChannel;
+	ok(channel.setUploadStream != null)  // nsIUploadChannel;
+	
+	var uri = createURI('http://google.com');
+	var channel = broad(IOService.newChannelFromURI(uri), [Ci.nsIHttpChannel]);
+	ok(channel.setRequestHeader != null) // nsIHttpChannel;
+	ok(channel.setUploadStream == null)  // nsIUploadChannel;
+	
+	
+	// createURI
+	is(createURI('C:\\').spec, 'file:///C:/');
+	is(createURI(new LocalFile('C:\\')).spec, 'file:///C:/');
+	is(createURI('file:///C:/').spec, 'file:///C:/');
+	is(createURI('http://google.com').spec, 'http://google.com/', 'URIになると最後にスラッシュが付加される');
+	
+	
+	// notify
+	notify('TITLE', 'MESSAGE', notify.ICON_DOWNLOAD);
+	
+	
+	// preference
+	is(getPrefType('foobar'), 'undefined');
+	
+	var key = 'extensions.tombloo.test_bool';
+	setPrefValue(key, true);
+	ok(getPrefValue(key));
+	is(typeof(getPrefValue(key)), 'boolean');
+	
+	var key = 'extensions.tombloo.test_number';
+	setPrefValue(key, 300);
+	is(getPrefValue(key), 300);
+	is(typeof(getPrefValue(key)), 'number');
+	
+	var key = 'extensions.tombloo.test_string';
+	setPrefValue(key, 'あいうえお');
+	is(getPrefValue(key), 'あいうえお');
+	is(typeof(getPrefValue(key)), 'string');
+	
+	
+	ok(getDownloadDir().exists());
+	ok(getProfileDir().exists());
+	
+	ok(! findCacheFile('http://google.com/notFound.jpg'));
+	
+	is(sanitizeHTML(
+		'<body><style>body{color:red}</style></body>'), 
+		'');
+	is(sanitizeHTML(
+		'<object></object><script>alert(3)<\/script><embed></embed>'), 
+		'');
+	is(sanitizeHTML(
+		'<input<script src="alert(3)"<\/script>'), 
+		'<input xmlns="http://www.w3.org/1999/xhtml" />');
+	is(sanitizeHTML(
+		'<pre>CODE<pre/>'), 
+		'<pre xmlns="http://www.w3.org/1999/xhtml">CODE<pre></pre></pre>',
+		'誤ったpreタグ');
+	is(sanitizeHTML(
+		'TEXT<title>HELLO BLOG</tile><link rel="stylesheet" type="text/css" href="style.css">'), 
+		'TEXT',
+		'title/link要素の除去');
+	is(sanitizeHTML(
+		'<a href="javascript:alert(4)">ALERT</a>'), 
+		'<a xmlns="http://www.w3.org/1999/xhtml">ALERT</a>');
+	is(sanitizeHTML(
+		'<a href="javascrip&#116;:alert(3)">ALERT</a>'), 
+		'<a xmlns="http://www.w3.org/1999/xhtml">ALERT</a>',
+		'数値実体参照を使ったスクリプトの埋め込み');
+	is(sanitizeHTML(
+		'<a href="javascrip&#116:alert(3)">ALERT</a>'), 
+		'<a xmlns="http://www.w3.org/1999/xhtml">ALERT</a>',
+		'数値実体参照を使ったスクリプトの埋め込み(末尾セミコロンの省略)');
+	is(sanitizeHTML(
+		'<form action="foo.cgi"><input type="submit"></form>'), 
+		'<form xmlns="http://www.w3.org/1999/xhtml"><input type="submit" /></form>');
+	
+	/*
+	正常動作、テストのためにgetContentsが必要
+	var file = getDownloadDir();
+	file.append('test_putContents.txt');
+	putContents(file, 'あいうえお', 'UTF-16');
+	*/
+	
+	// AppInfo
+	ok(parseFloat(AppInfo.version) > 1.5, 'Firefoxのバージョンを確認');
+	
+	// getExtensionDir
+	var file = getExtensionDir('tombloo@brasil.to');
+	file.append('chrome.manifest');
+	ok(file.exists(), '拡張ディレクトリの取得');
+	
+	// till
+	var flag = false;
+	setTimeout(function(){
+		flag = true;
+	}, 1000);
+	till(function(){
+		return flag
+	});
+	ok(flag, 'スレッドを使った待機');
+	
+} catch (err) {
+	var s = [];
+	s.push('TEST SUITE FAILURE!');
+	for(var prop in err)
+		s.push(prop + ':  ' + err[prop]);
+	ok(false, s.join('\n'));
+}
+</script>
+
+</body>
+</html>

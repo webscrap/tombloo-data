@@ -131,6 +131,41 @@ Tombloo.Service.extractors.register({
 });
 
 Tombloo.Service.extractors.register({
+		name : 'Video - 56.com',
+		ICON : 'http://www.56.com/favicon.ico',
+		check : function(ctx){
+			return ctx.host.match('56.com');
+		},
+		extract : function(ctx){
+			var id = ctx.window._oFlv_o && ctx.window._oFlv_o.EnId;
+			if(!id) {
+				var href = $x('id("pa_see_source")/a/@href');
+				if(!href) {
+					href = ctx.window.location.href;
+				}
+				if(href) {
+					id = href.replace(/.*\/([^\/]+)\.html$/,'$1');
+				}
+			}
+			if(id) {
+				var href = 'http://player.56.com/v_' + id + '.swf';
+				return {
+					type    : 'video',
+					item    : ctx.title,
+					itemUrl : ctx.href,
+					body	: '<embed src="' + href + '" width=480 height=405></embded>',
+					video	: href,
+				}
+			}
+			return {
+				type	: 'link',
+				item	: ctx.title,
+				itemUrl	: ctx.href,
+			}
+		},
+});
+
+Tombloo.Service.extractors.register({
 		name : 'Video - Youku',
 		ICON : 'http://www.youku.com/favicon.ico',
 		check : function(ctx){

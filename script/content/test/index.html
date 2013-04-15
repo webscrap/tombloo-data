@@ -1,0 +1,33 @@
+<html>
+<head>
+	<script type="text/javascript" src="library/MochiKit.js"></script>
+	<script type="text/javascript" src="library/SimpleTest.js"></script>
+	<script type="text/javascript" src="library/TestRunner.js"></script>
+	<script type="text/javascript" src="test.js"></script>
+	<link rel="stylesheet" type="text/css" href="library/test.css">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style>
+	div.tests_report{
+		display : none;
+	}
+	.toggles{
+		display : none;
+	}
+	</style>
+</head>
+<body>
+<script type="text/javascript">
+	// chrome://tombloo/content/test/index.html
+	TestRunner.runTests(
+		'test_Components.html',
+		'test_utility.html',
+		'test_Database.html',
+		'test_Progress.html',
+		'test_model.html',
+		'test_Tumblr.html',
+		'test_Tombloo.html',
+		'test_Tombloo.Service.extractors.html'
+	);
+</script>
+</body>
+</html>

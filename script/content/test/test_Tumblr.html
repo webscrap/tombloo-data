@@ -1,0 +1,184 @@
+<html>
+<head>
+	<script type="text/javascript" src="library/MochiKit.js"></script>
+	<script type="text/javascript" src="library/SimpleTest.js"></script>
+	<script type="text/javascript" src="test.js"></script>
+	<link rel="stylesheet" type="text/css" href="library/test.css">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+
+<pre id="test">
+</pre>
+<script type="text/javascript" src="../library/00_MochiKit.js"></script>
+<script type="text/javascript" src="../library/00_prototype.js"></script>
+<script type="text/javascript" src="../library/00_component.js"></script>
+<script type="text/javascript" src="../library/01_utility.js"></script>
+<script type="text/javascript" src="../library/10_Progress.js"></script>
+<script type="text/javascript" src="../library/10_Database.js"></script>
+<script type="text/javascript" src="../library/20_Tumblr.js"></script>
+<script type="text/javascript" src="../library/20_Tombloo.js"></script>
+<script type="text/javascript">
+try {
+	
+	SimpleTest.waitForExplicitFinish();
+	
+	var d = succeed();
+	
+	// chrome://tombloo/content/test/test_Tumblr.html
+	
+	var reqs = Tumblr._splitRequests(130);
+	is(reqs.length, 3);
+	is(reqs[0][0], 0);
+	is(reqs[0][1], 50);
+	is(reqs[1][0], 50);
+	is(reqs[1][1], 50);
+	is(reqs[2][0], 100);
+	is(reqs[2][1], 30);
+	
+	var reqs = Tumblr._splitRequests(35);
+	is(reqs.length, 1);
+	is(reqs[0][0], 0);
+	is(reqs[0][1], 35);
+	
+	var fields = {
+		'post[type]' : 'photo', 
+		'post[two]'  : '' + (<data><![CDATA[
+<p><a href="http://too.tumblr.com/post/25307827">too</a>:</p>
+
+<blockquote><p><a href="http://too.tumblr.com/post/24601328">too</a>:</p>
+
+<blockquote>TEST</blockquote>
+
+<p></p></blockquote>
+
+<p></p>
+		]]></data>),
+	}
+	is(Tumblr.trimReblogInfo(fields)['post[two]'], 'TEST');
+	
+	var fields = {
+		'post[type]' : 'link', 
+		'post[three]'  : '' + (<data><![CDATA[
+	<p><a href="http://too.tumblr.com/post/25310565">too</a>:</p>
+
+<blockquote><img src="http://mozshot.nemui.org/shot?http://cxx.tumblr.com/post/24916599" /></blockquote>
+
+<p></p>
+		]]></data>),
+	}
+	is(Tumblr.trimReblogInfo(fields)['post[three]'], '<img src="http://mozshot.nemui.org/shot?http://cxx.tumblr.com/post/24916599" />');
+	
+	var fields = {
+		'post[type]' : 'quote', 
+		'post[two]'  : '<a href="http://www.tumblr.com/dashboard">Tumblr</a> (via <a href="http://too.tumblr.com/">too</a>)',
+	}
+	is(Tumblr.trimReblogInfo(fields)['post[two]'], '<a href="http://www.tumblr.com/dashboard">Tumblr</a>');
+	
+	
+	/*
+	TEST OK
+	/* 
+	// read
+	d.addCallback(bind('read', Tumblr), 'to', 'photo', 25);
+	d.addCallback(function(res){
+		is(res.length, 25);
+	});
+	
+	// read / 2ページ取得
+	d.addCallback(bind('read', Tumblr), 'to', 'photo', 70);
+	d.addCallback(function(res){
+		is(res.length, 70);
+		is(res[0].type, 'photo');
+		is(res[0].user, 'to');
+		ok(res[0].date);
+		ok(res[0].imageId);
+	});
+	
+	// 途中終了 / ポストNo / ウェイト
+	d.addCallback(bind('read', Tumblr), 'to', 'photo', 150, function(posts, postNum){
+		if(postNum>=25)
+			throw StopProcess;
+		
+		ok(posts[0].date);
+	});
+	d.addCallback(function(res){
+		is(res.length, 100, '途中で停止できるか');
+	});
+	
+	
+	// getInfo
+	d.addCallback(bind('getInfo', Tumblr), 'to');
+	d.addCallback(function(info){
+		is(info.type, '');
+		is(info.name, 'to');
+		is(info.title, 'to');
+		is(info.timezone, 'Asia/Tokyo');
+		ok(info.total > 15000);
+	});
+	
+	
+	// remove
+	d.addCallback(bind('remove', Tumblr), 18344636);
+	
+	d.addCallback(bind('getInfo', Tumblr), 'to', 'photo');
+	d.addCallback(function(info){
+		is(info.type, 'photo');
+		is(info.start, 0);
+		is(info.name, 'to');
+		is(info.title, 'to');
+		is(info.timezone, 'Asia/Tokyo');
+		ok(info.total > 1000);
+		alert(info.total);
+	});
+	
+	
+	// getLoggedInUser
+	var info = {};
+	d.addCallback(bind('getLoggedInUser', Tumblr));
+	d.addCallback(function(user){
+		is(user, 'too', 'ユーザー名の確認');
+		info.name = user;
+	});
+	d.addErrback(function(e){
+		is(e.message, 'Not loggedin.', '未ログイン');
+	});
+	
+	d.addCallback(function(){
+		return Tumblr.getCurrentUser();
+	}).addCallback(function(user){
+		ok(user.length > 0, 'ログインユーザー名を取得できるか?');
+	});
+	
+	d.addCallback(function(){
+		return Tumblr.logout();
+	});
+	
+	d.addCallback(function(){
+		return Tumblr.login('user@mail.com', 'password');
+	});
+	*/
+	
+	
+	d.addErrback(function(e){
+		log(e)
+		ok(false);
+	});
+	d.addBoth(function(){
+		SimpleTest.finish()
+	});
+	
+	
+} catch (err) {
+	var s = [];
+	s.push('TEST SUITE FAILURE!');
+	for(var prop in err)
+		s.push(prop + ':  ' + err[prop]);
+	ok(false, s.join('\n'));
+	
+	SimpleTest.finish()
+}
+</script>
+
+</body>
+</html>
