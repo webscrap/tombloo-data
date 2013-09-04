@@ -69,27 +69,6 @@ update(models.WeHeartIt,{
 	},
 });
 
-/*
-update(models.FirefoxBookmark,{
-	check	: function(ps) {
-		return ps.type.match(/photo|quote|link|video|regular/);
-	},
-	post	: function(oldps) {
-		if(oldps.type == 'photo') {
-			var ps = modelExt.createPost(oldps,'links');
-			for(var i=0;i<ps.tags.length;i++) {
-				if(ps.tags[i] == 'photolink') {
-					ps.tags[i] = 'linkphoto';
-				}
-			}
-			ps.type = 'link';
-			this.addBookmark(ps.itemUrl, ps.item, ps.tags, ps.description);
-		}
-		var ps = modelExt.createPost(oldps,'firefox');
-		return succeed(this.addBookmark(ps.itemUrl, ps.item, ps.tags, ps.description));
-	},
-});
-*/
 ['Readability','Instapaper','HatenaBookmark'].forEach(function(name,idx) {
 	modelExt.hookModel(name,'links',/photo|quote|link|video|regular/);
 });

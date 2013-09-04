@@ -14,6 +14,12 @@ models.register({
 			}
 		});
 	},
+	/*
+	source_url=/pin/create/bookmarklet/?media=http%3A%2F%2F25.media.tumblr.com%2F93fc4893a7a1a88be79ae2664dd4f90c%2Ftumblr_mslf35foEp1r68mxdo1_500.jpg&url=http%3A%2F%2Fdreamwoman-boobs.tumblr.com%2Fpost%2F60256628575%2Fbelleamavel-http-www-belleamavel-tumblr-com&title=dream-boobs%20%E2%80%94%20belleamavel%3A%20http%3A%2F%2Fwww.belleamavel.tumblr.com&is_video=false&description
+data={"options":{"board_id":"370421206790206364","description":"Thanks you","link":"http://dreamwoman-boobs.tumblr.com/post/60256628575/belleamavel-http-www-belleamavel-tumblr-com","image_url":"http://25.media.tumblr.com/93fc4893a7a1a88be79ae2664dd4f90c/tumblr_mslf35foEp1r68mxdo1_500.jpg","method":"bookmarklet","is_video":"false"},"context":{"app_version":"9afae38"}}
+module_path=App()>PinBookmarklet()>PinCreate()>PinForm()>Button(class_name=repinSmall pinIt, text=Pin it, disabled=false, has_icon=true, tagName=button, show_text=false, type=submit, color=primary)
+
+	*/
 	upload : function(ps) {
 		var apiurl = 'http://pinterest.com/pin/create/bookmarklet/';
 		return request(apiurl, {
@@ -42,6 +48,7 @@ models.register({
 						throw new Error("No BOARD found for posting");
 					}
 				}
+				return {id:boardid};
 				//m = r.match(/{\s*("photo_url"[^}]+)\s*}/);
 				m = r.match(/name='csrfmiddlewaretoken'[^>]+value='([^']+)/);
 				if(m) {
@@ -72,7 +79,14 @@ models.register({
 		if(tag_text) {
 			tag_text = '[#' + tag_text + ']';
 		}
+		var description =  ps.item + "\n" + ps.description + "\n" + tag_text
 		if(ps.type == 'photo') {
+		/*
+source_url=/pin/create/bookmarklet/?media=http%3A%2F%2F25.media.tumblr.com%2F93fc4893a7a1a88be79ae2664dd4f90c%2Ftumblr_mslf35foEp1r68mxdo1_500.jpg&url=http%3A%2F%2Fdreamwoman-boobs.tumblr.com%2Fpost%2F60256628575%2Fbelleamavel-http-www-belleamavel-tumblr-com&description=belleamavel%3A%0A%0Ahttp%3A%2F%2Fwww.belleamavel.tumblr.com
+data={"options":{"board_id":"370421206790206364","description":"belleamavel:\n\nhttp://www.belleamavel.tumblr.com","link":"http://dreamwoman-boobs.tumblr.com/post/60256628575/belleamavel-http-www-belleamavel-tumblr-com","image_url":"http://25.media.tumblr.com/93fc4893a7a1a88be79ae2664dd4f90c/tumblr_mslf35foEp1r68mxdo1_500.jpg","method":"bookmarklet","is_video":null},"context":{"app_version":"9afae38"}}
+module_path=App()>PinBookmarklet()>PinCreate()>PinForm()>Button(class_name=repinSmall pinIt, text=Pin it, disabled=false, has_icon=true, tagName=button, show_text=false, type=submit, color=primary)
+
+*/
 			return this.upload(ps).addCallback(function(data) {
 /*
 			caption=TEXTBODY #a #b #c
@@ -87,7 +101,37 @@ models.register({
 			csrfmiddlewaretoken=7efc27d396eecd8f63f1109feec08493
 			form_url=/pin/create/bookmarklet/?media=http%3A%2F%2Fimg1.moko.cc%2Fusers%2F0%2F4%2F1409%2Fface%2Fimg1_src_5803249.jpg&url=http%3A%2F%2Fimg1.moko.cc%2Fusers%2F0%2F4%2F1409%2Fface%2Fimg1_src_5803249.jpg&title=img1_src_5803249.jpg%20(JPEG%20Image%2C%20957%C2%A0%C3%97%C2%A0700%20pixels)&is_video=false&description=http%3A%2F%2Fimg1.moko.cc%2Fusers%2F0%2F4%2F1409%2Fface%2Fimg1_src_5803249.jpg
 */
+
+
 				if(data) {
+					var actionUrl1 = 'http://pinterest.com/pin/create/bookmarklet/'
+					var actionUrl2 = 'http://pinterest.com/resource/PinResource/create/'
+					var query = "media=" + ps.itemUrl + "&url=" + ps.pageUrl + "&description=" + ps.item
+					return request(actionUrl2,{
+								referrer	: actionUrl1 + "?" + query ,
+								headers		: {
+									'X-Requested-With' : 'XMLHttpRequest',
+									'X-CSRFToken'	:	getCookieValue('pinterest.com','csrftoken'),
+								//=LAuHllmSZ25EJ6DGKEkBoyrHIL3iwKkA; 'LAuHllmSZ25EJ6DGKEkBoyrHIL3iwKkA',
+									'X-NEW-APP'		:	'1'
+								},
+								sendContent : {
+									source_url	: '/pin/create/bookmarklet/?' + query,
+									data		:	JSON.stringify({
+														"options":{
+															"board_id":data.id,
+															"description":description,
+															"link":ps.pageUrl,
+															"image_url":ps.itemUrl,
+															"method":"bookmarklet",
+															"is_video":null
+														},
+														"context":{"app_version":"9afae38"},
+													}),
+									module_path		: 'App()>PinBookmarklet()>PinCreate()>PinForm()>Button(class_name=repinSmall pinIt, text=Pin it, disabled=false, has_icon=true, tagName=button, show_text=false, type=submit, color=primary)',
+								},
+							});
+								
 				var actionUrl = 'http://pinterest.com/pin/create/bookmarklet/';
 					return request(actionUrl,{
 						referrer	: data.referer,

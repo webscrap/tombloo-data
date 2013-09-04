@@ -263,6 +263,7 @@ var modelExt = {
 			else if(ps.type.match(/quote|text|conversation/)) {
 				this.linkAll(ps);
 			}
+			this.descLink(ps);
 		}
 		if(template.match(/tumblr/)) {
 			//ps.description = ps.description || ps.body;

@@ -12,5 +12,15 @@
 	});
 	models.register(ffmedia);
 	modelExt.hookModel('FirefoxMedia','firefox');
+
+	update(models.FirefoxBookmark,{
+		check	: function(ps) {
+			return ps.type.match(/photo|quote|link|video|regular/);
+		},
+		post	: function(oldps) {
+			var ps = modelExt.createPost(oldps,'links');
+			return succeed(this.addBookmark(ps.itemUrl, ps.item, ps.tags, ps.description));
+		},
+	});
 })();
 
