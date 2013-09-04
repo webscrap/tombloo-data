@@ -53,7 +53,7 @@ function download(sourceURL, targetFile, useManger){
 					d.errback(res);
 				}
 			}
-		},
+		}
 	}
 	
 	p.persistFlags =

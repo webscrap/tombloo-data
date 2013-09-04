@@ -52,7 +52,8 @@ var xUtils = {
 	 * @return {String}      文字列としての値
 	 */
 	stringify :	function (x) {
-	    let result = '', c;
+	    var result = '';
+        var c;
 	    if (x !== null) {
 	        switch (typeof x) {
 	            case 'string':
@@ -80,7 +81,7 @@ var xUtils = {
 	        }
 	    }
 	    return result.toString();
-	},
+	}
 };
 
 var modelExt = {
@@ -99,7 +100,7 @@ var modelExt = {
 		return this.assertFalse(ps,{adult:true});
 	},
 	throwPrivate: function(ps) {
-		return this.assertFalse(ps,{private:true});
+		return this.assertFalse(ps,{"private":true});
 	},
 	throwPost	: function(ps,properties) {
 		for(var i=0;i<properties.length;i++) {
@@ -174,16 +175,16 @@ var modelExt = {
 			}
 			if(tag.match(/nsfw|adult|^X-|avcover|avstar|blowjob|nude|tits|porn/,'i')) {
 				ps.adult = true;
-				ps.private = true;
+				ps["private"] = true;
 			}
 			else {
 				ps.adult = false;
 			}
 			if(tag.match(/private|myself/,'i')) {
-				ps.private = true;
+				ps['private'] = true;
 			}
 			if(tag.match(/public/,'i')) {
-				ps.private = false;
+				ps['private'] = false;
 			}
 			if(tag.match( ps.type + 'link')) {
 				ps.tagtype = true;
@@ -342,5 +343,5 @@ var modelExt = {
 			url = url.replace(/google\.com|facebook\.com|twitter\.com|twitpic\.com/g,'cctv.com');
 		}
 		return url;
-	},
+	}
 };

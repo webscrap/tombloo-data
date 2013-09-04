@@ -19,7 +19,7 @@ models.register({
 			ti			: ps.item,
 			lo			: ps.pageUrl,
 			f			: '1',
-			type		: type,
+			type		: type
 		}
 		if(ps.type == 'photo') {
 			queryString['src[0]'] = escape(ps.itemUrl);
@@ -27,7 +27,7 @@ models.register({
 		if(!newTab) {
 			return request(apiurl, {
 				referrer	: ps.pageUrl || ps.itemUrl,
-				sendContent : queryString,
+				sendContent : queryString
 			});
 		}
 		else {
@@ -75,7 +75,8 @@ photos=[{"id":"93FFCA40C889B6A70F134C2B9E28BAB6","desc":""}]
 title=
 layout=1
 shareSource=http://www.400kb.com/go.php?ref=hXLlpWUV8hofme0
-desc=<p>[åç¢ç¡ç¢¼]çä¼¼LZRè³ç§é¨è§é¢[1][MP4/2MB]</p>
+desc=<p>[åç¢ç¡ç¢¼]çä¼¼LZRè³ç
+§é¨è§é¢[1][MP4/2MB]</p>
 uri=
 tags=
 privacy=2
@@ -109,7 +110,7 @@ autoSaveId=5087813
 					layout		: '1',
 					uri			: '',
 					shareSource	: ps.pageUrl,
-					privacy		: (ps.private || ps.adult) ? '2' : '0',
+					privacy		: (ps['private'] || ps.adult) ? '2' : '0',
 					blogUrl		: data.blogid,
 					queue		: 'true',
 					syncToWeibo	: "false",
@@ -119,7 +120,7 @@ autoSaveId=5087813
 					syncToRenren	: "false",
 					syncToFacebook	: "false",
 					syncToTwitter	: "false",
-					syncToFlickr	: "false",
+					syncToFlickr	: "false"
 			};
 			if(ps.type == 'link') {
 				sendContent.link = ps.itemUrl;
@@ -136,9 +137,9 @@ autoSaveId=5087813
 			return request(actionUrl,{
 				referrer	: data.referer,
 				headers		: {
-					'X-Requested-With' : 'XMLHttpRequest',
+					'X-Requested-With' : 'XMLHttpRequest'
 				},
-                sendContent : sendContent,
+                sendContent : sendContent
 			});
 		}
 	},
@@ -172,5 +173,5 @@ autoSaveId=5087813
 		//	error(res);
 			throw new Error("Post failed:\n " + r);
 		}
-	},
+	}
 });
