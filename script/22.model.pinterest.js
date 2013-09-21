@@ -73,8 +73,7 @@ models.register({
 								referrer	: actionUrl1 + "?" + query ,
 								headers		: {
 									'X-Requested-With' : 'XMLHttpRequest',
-									'X-CSRFToken'	:	getCookieValue('pinterest.com','csrftoken'),
-								//=LAuHllmSZ25EJ6DGKEkBoyrHIL3iwKkA; 'LAuHllmSZ25EJ6DGKEkBoyrHIL3iwKkA',
+									'X-CSRFToken'	:	getCookieValue('.pinterest.com','csrftoken'),
 									'X-NEW-APP'		:	'1'
 								},
 								sendContent : {
