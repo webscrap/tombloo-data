@@ -25,7 +25,7 @@ models.register({
 			var id;
 			var r = res.responseText;
 			if(r) {
-				var m = r.match(/app\.req\.user\["boards"\]\s*=\s*(\[[^\]]+\])/);
+				var m = r.match(/app\.req\.user\["boards"\]\s*=\s*(\[[^;]+\]);/);
 				if(m) {
 					var boards = JSON.parse(m[1]);
 					if(boards.length) {
