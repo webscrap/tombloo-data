@@ -47,7 +47,7 @@ models.register({
 		}
 		var desc = ps.item;
 		if(ps.description) desc += "\n\n" + ps.description;
-		if(ps.tags)	desc += "\n\n" + xUtils.toWeiboText(ps.tags);
+		//if(ps.tags)	desc += "\n\n" + xUtils.toWeiboText(ps.tags);
 		return self.getAlbum(referrer,ps).addCallback(function(album){
 			return request(apiurl, {
 				referrer	: referrer,
@@ -57,7 +57,7 @@ models.register({
 					url		: ps.pageUrl,
 					siteids : '[]',
 					price	: '',
-					image_infos	: JSON.stringify([{src:ps.itemUrl,title:'',alt:''}]),
+					image_infos	: JSON.stringify([{src:ps.itemUrl,title:ps.item,alt:''}]),
 					label	: joinText(ps.tags,'+'),
 				},
 			}).addCallback(function(res) {self.checkPost(res,ps)});
