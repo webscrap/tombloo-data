@@ -2,7 +2,7 @@
 models.register({
 	name : 'Pinterest',
 
-	ICON : 'http://pinterest.com/favicon.ico',
+	ICON : 'http://www.pinterest.com/favicon.ico',
 	
 	check : function(ps){
 		return true;
@@ -15,7 +15,7 @@ models.register({
 		});
 	},
 	upload : function(ps) {
-		var apiurl = 'http://pinterest.com/pin/create/bookmarklet/';
+		var apiurl = 'http://www.pinterest.com/pin/create/bookmarklet/';
 		return request(apiurl, {
 				referrer	: ps.pageUrl || ps.itemUrl,
 				queryString : {
@@ -66,8 +66,8 @@ models.register({
 				*/
 			return this.upload(ps).addCallback(function(data) {
 				if(data) {
-					var actionUrl1 = 'http://pinterest.com/pin/create/bookmarklet/'
-					var actionUrl2 = 'http://pinterest.com/resource/PinResource/create/'
+					var actionUrl1 = 'http://www.pinterest.com/pin/create/bookmarklet/'
+					var actionUrl2 = 'http://www.pinterest.com/resource/PinResource/create/'
 					var query = "media=" + ps.itemUrl + "&url=" + ps.pageUrl + "&description=" + ps.item
 					return request(actionUrl2,{
 								referrer	: actionUrl1 + "?" + query ,
