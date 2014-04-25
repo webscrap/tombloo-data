@@ -2,7 +2,7 @@
 models.register({
 	name : '点点',
 
-	ICON : 'http://s.libdd.com/img/icon/favicon.$5106.ico',
+	ICON : 'http://www.diandian.com/favicon.ico',
 	SHARE_API : 'http://www.diandian.com/share',///v2?tmp=' + (+new Date);
 	
 	check : function(ps){

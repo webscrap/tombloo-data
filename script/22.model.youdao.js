@@ -14,9 +14,10 @@ models.register({
 	post : function(oldps){
 		var ps = modelExt.createPost(oldps,'firefox');
 	    var tag = joinText(ps.tags, ',');
-        return request('http://shuqian.youdao.com/manage?a=add', {
+        return request('http://shuqian.youdao.com/manage?a=popwindow', {
             referrer    : ps.pageUrl,
             sendContent : {
+				type		: 'add',
                 url         : ps.itemUrl,
                 title       : ps.item,
                 tags        : tag,

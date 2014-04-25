@@ -1,7 +1,7 @@
 
 models.register({
 	name : '爱库',
-	ICON : 'http://www.ikeepu.com/favicon.ico',
+	ICON : 'http://aiku.me/favicon.ico',
 	
 	check : function(ps){
 		return true;
@@ -29,13 +29,13 @@ models.register({
 
 /*
  
-URL=http://ikeepu.com/apps/bookmark/add
+URL=http://aiku.me/apps/bookmark/add
 
 from=BOOKMARK.1.0
 sid=10179480
-url=http%3A%2F%2Fikeepu.com%2Fapp%2F20
+url=http%3A%2F%2Faiku.me%2Fapp%2F20
 type=page
-referer=http%3A%2F%2Fikeepu.com%2Fapp%2F20
+referer=http%3A%2F%2Faiku.me%2Fapp%2F20
 thumb=
 cod_hack=%E2%84%A2
 title=TITLE
@@ -45,8 +45,8 @@ privacy=1
 sync=sina
 description=DESC
 */
-		//var actionUrl = 'http://ikeepu.com/me/keep';
-		var actionUrl = 'http://ikeepu.com/apps/bookmark/add';
+		//var actionUrl = 'http://aiku.me/me/keep';
+		var actionUrl = 'http://aiku.me/apps/bookmark/add';
         if(ps.type == 'photo') {
             return this.request(actionUrl, {
                 referrer    : ps.pageUrl ,
