@@ -301,6 +301,7 @@ update(Tombloo.Service, {
 		if(doc && title) {
 			setTimeout(function(){
 				doc.title = title;
+				log(title);
 				self.o_post(ps,posters);
 			},delay);
 		}
