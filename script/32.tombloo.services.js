@@ -233,7 +233,7 @@ Tombloo.Service.extractors.register({
 		ps.itemUrl = image.getAttribute('src');
 		ps.pageUrl = image.getAttribute('href');
 		ps.page = ps.item || '';
-		ps.description = image.getAttribute('description') || '';
+		ps.description = image.getAttribute('description') || image.getAttribute('desc') || '';
 		if(image.getAttribute('tags')) {
 			ps.tags = image.getAttribute('tags').split(/\s*,\s*/);
 		}

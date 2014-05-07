@@ -172,6 +172,7 @@ var modelExt = {
 		if(tag) {	
 			if(tag.match(/,/)) {
 				ps.tags = tag.split(/\s*,\s*/);
+				tag = joinText(ps.tags,' ');
 			}
 			if(tag.match(/nsfw|adult|^X-|avcover|avstar|blowjob|nude|tits|porn/,'i')) {
 				ps.adult = true;
