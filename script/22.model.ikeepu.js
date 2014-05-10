@@ -57,7 +57,7 @@ description=DESC
                     url         : ps.pageUrl + '#' + ps.itemUrl,
                     title       : ps.item,
                     tag         : tag,
-                    privacy     : 1, //!!Always keep private.
+                    privacy     : privacy,//1, //!!Always keep private.
                     sync        : sync,
                     category    : category,
                     description : ps.description,

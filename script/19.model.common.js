@@ -191,10 +191,17 @@ var modelExt = {
 				ps.tagtype = true;
 			}
 			if(tag.match(/gallery|galleries/,'i')) {
-				ps.gallery = 1;
+				ps.gallery = true;
 			}
 			else {
-				ps.gallery = 0;
+				ps.gallery = false;
+			}
+			if(tag.match(/erotic/,'i')) {
+				ps.erotic = true;
+				ps.adult = true;
+			}
+			else {
+				ps.erotic = false;
 			}
 		}
 		var typetag = ps.type + 'link';
@@ -208,12 +215,21 @@ var modelExt = {
 				ps.tags.push(ps.type + 'link');
 			}
 		}
-		if(ps.type == 'photo' && ps.pageUrl.match(/^https?:\/\/[^\/]+google\./)) {
-			ps.pageUrl = ps.pageUrl.replace(/&(authuser|oq|gs_l|newwindow|hl|biw|bih|ei)=[^&]*/g,'');
-		}
+		//if(ps.type == 'photo' && ps.pageUrl.match(/^https?:\/\/[^\/]+google\./)) {
+		//	ps.pageUrl = ps.pageUrl.replace(/&(authuser|oq|gs_l|newwindow|hl|biw|bih|ei)=[^&]*/g,'');
+		//}
 		['itemUrl','pageUrl'].forEach(function(p) {
 			if(ps[p]) {
+			
+				//convert livedoor.blogimg.jp
 				ps[p].replace(/livedoor\.blogimg\.jp/g,'image.blog.livedoor.jp');
+				
+				//clean google url
+				if(ps[p].match(/^[^\/:]+:\/\/(?:[^\/]+\.)?google\.[^\/]+/)) {
+					//alert("Google PRE  :" + ps[p]);
+					ps[p] = ps[p].replace(/&(?:authuser|source|sa|oq|gs_l|ved|tbm|newwindow|hl|biw|bih|ei)=[^&#]*/g,'');
+					//alert("Google POST :" + ps[p]);
+				}
 			}
 		});
 		if(!ps.item) {
