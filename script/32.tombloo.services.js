@@ -223,11 +223,14 @@ Tombloo.Service.extractors.register({
 
 Tombloo.Service.extractors.register({
 	name : 'Photos - Images Miner',
-	ICON : 'http://userscripts.org/images/script_icon.png',
+	// ICON : 'http://userscripts.org/images/script_icon.png',
+	ICON :	'https://addons.cdn.mozilla.net/img/uploads/addon_icons/0/748-64.png',
 	check : function(ctx) {
+		//if(ctx.window.$myPlace.Cached.IMAGESMINER) return true;
+		//return false;
 		return ctx.window.document.getElementById("xz_imagesminer_data");//.childNodes.length;
 	},
-	imageToPost : function(image) {
+	imageToPost : function(image,ctx) {
 		var ps = {};
 		ps.item = image.getAttribute('title') || image.getAttribute('text') || '';
 		ps.itemUrl = image.getAttribute('src');
@@ -237,6 +240,16 @@ Tombloo.Service.extractors.register({
 		if(image.getAttribute('tags')) {
 			ps.tags = image.getAttribute('tags').split(/\s*,\s*/);
 		}
+		ps.itemUrl = ps.itemUrl ? resolveRelativePath(ps.itemUrl,ctx.href) : '';
+		ps.pageUrl = ps.pageUrl ? resolveRelativePath(ps.pageUrl,ctx.href) : '';
+		if(ps.itemUrl) {
+			ps.type = 'photo';
+		}
+		else {
+			ps.type = 'link';
+			ps.itemUrl = ps.pageUrl;
+		}
+		//log(ps.pageUrl);
 		return ps;
 	},
 	extract : function(ctx) {
@@ -246,18 +259,20 @@ Tombloo.Service.extractors.register({
 			itemUrl	: ctx.href,
 			window	: ctx.window,
 		};
+		//alert(ctx.window.$myPlace.Cached.IMAGESMINER);
 		var images = ctx.window.document.getElementById("xz_imagesminer_data").childNodes;
+		//var images = ctx.window.$myPlace.Cached.IMAGESMINER;
 		if(images && images.length) {
 			ps.type = 'photo';
-			update(ps,this.imageToPost(images[0]));
+			update(ps,this.imageToPost(images[0],ctx));
 			if(images.length > 1) {
 				ps.description = 'index:[0-' + (images.length -1) + ']';
-				ps.itemUrl = this.ICON;
+				ps.itemUrl = ps.itemUrl || this.ICON;
 				ps.posts = [];
 				ps.item = ctx.title;
 				ps.page = ctx.title;
 				for(var i=0;i<images.length;i++) {
-					ps.posts.push(this.imageToPost(images[i]));
+					ps.posts.push(this.imageToPost(images[i],ctx));
 				}
 			}
 		}
