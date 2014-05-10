@@ -66,8 +66,14 @@ models.Tumblr.post = function(oldps){
 };
 
 addBefore(Tumblr, 'appendTags', function(form, ps){
-	if(ps.type != 'regular')
-		form['post[state]'] = 2;
+	//About post[state]
+	// 0		-	default
+	// 2		-	queue
+	// private	-	private
+	
+	//form['post[state]'] = "private"; //Keep private 
+	// if(ps.type != 'regular')
+		// form['post[state]'] = 2;
 });
 
 
@@ -100,10 +106,13 @@ update(models.WeHeartIt,{
 });
 
 
-['Readability','Instapaper','HatenaBookmark'].forEach(function(name,idx) {
+['Readability','Instapaper'].forEach(function(name,idx) {
 	modelExt.hookModel(name,'links',/photo|quote|link|video|regular/);
 });
 
+['HatenaBookmark'].forEach(function(name,idx){
+	modelExt.hookModel(name,'firefox',/photo|quote|link|video|regular/);
+});
 
 update(models.Flickr,{
 	API_KEY : 'e19f9a2b425faaad9b68e4078e487251',
