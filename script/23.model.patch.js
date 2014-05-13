@@ -50,32 +50,6 @@ update(models.StumbleUpon, {
 });
 
 
-models.Tumblr.post = function(oldps){
-	var self = this;
-	var ps = modelExt.createPost(oldps,'tumblr+video');
-	var endpoint = Tumblr.TUMBLR_URL + 'new/' + ps.type;
-	return this.postForm(function(){
-		return self.getForm(endpoint).addCallback(function(form){
-			var frm = Tumblr[ps.type.capitalize()].convertToForm(ps);
-			frm['post[source_url]'] = ps.pageUrl;
-			update(form, frm);
-			self.appendTags(form, ps);
-			return request(endpoint, {sendContent : form});
-		});
-	});
-};
-
-addBefore(Tumblr, 'appendTags', function(form, ps){
-	//About post[state]
-	// 0		-	default
-	// 2		-	queue
-	// private	-	private
-	
-	//form['post[state]'] = "private"; //Keep private 
-	// if(ps.type != 'regular')
-		// form['post[state]'] = 2;
-});
-
 
 update(models.WeHeartIt,{
 	URL   : 'https://weheartit.com/',
@@ -133,7 +107,7 @@ update(models.Flickr,{
 				photo       : file,
 				title       : ps.item || ps.page || '',
 				description : ps.description || '',
-				is_public   : ((ps.private || ps.adult) ? 0 : 1),
+				is_public   : 0,//((ps.private || ps.adult) ? 0 : 1),
 				tags        : joinText(ps.tags, ' '),
 			});
 		});

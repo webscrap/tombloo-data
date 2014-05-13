@@ -281,6 +281,105 @@ Tombloo.Service.extractors.register({
 });
 
 
+Tombloo.Service.extractors.register({
+	name : 'Posts from selection ',
+	ICON : 'http://weibo.com/favicon.ico',
+	check : function(ctx){
+			return ctx.selection && ctx.host.match(/weibo\.com|weibo\.cn|t\.sina\.com\.cn/);
+		},
+		extract : function(ctx){
+			var html = '';
+			var p = ctx.document.createElement("div");
+			if (typeof ctx.window.getSelection != "undefined") {
+				var sel = ctx.window.getSelection();
+				if (sel.rangeCount) {
+					for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+						p.appendChild(sel.getRangeAt(i).cloneContents());
+					}
+					html = p.innerHTML;
+				}
+		    } else if (typeof ctx.document.selection != "undefined") {
+				if (ctx.document.selection.type == "Text") {
+					html = ctx.document.selection.createRange().htmlText;
+					p.innerHTML = html;
+				}
+			}
+			
+			var wb_detail = p.getElementsByClassName('WB_detail');
+			//alert('WB_DETAIL:' + wb_detail.length);
+			var posts = new Array;
+			for(var i=0;i<wb_detail.length;i++) {
+				var detail = wb_detail[i];
+				var imgs = detail.getElementsByTagName('img');
+				var text = detail.getElementsByClassName('WB_text');
+				//alert('TEXT:' + text[0].textContent);
+				var link = detail.getElementsByClassName('S_link2 WB_time');
+				//alert('LINK:' + link[0].href);
+				if(!(text && text.length)) {
+					continue;
+				}
+				if(!(link && link.length)) {
+					continue;
+				}
+				
+				text = text[0].textContent.replace(/^[　\s]+/,'');
+				text = text.replace(/[　\s]+$/,'');
+				var href = link[0].href;				
+				var title = ctx.document.title;
+				title = title.replace(/\|[^\|]+$/,'');
+				var images = 0;
+				if(imgs && imgs.length) {
+					var imgexp = /\/(bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.jpg$/;
+					for(var j=0;j<imgs.length;j++) {
+						var src = imgs[j].src;
+						if(src && src.match(imgexp)) {
+							images++;
+							src = src.replace(imgexp,'/large/$2.jpg');
+							posts.push({
+								itemUrl	:	src,
+								pageUrl	:	href,
+								item	:	text + ' - ' + title,
+								type	:	'photo',
+							});
+						}
+					}
+				}
+				if(!images) {
+					posts.push({
+						itemUrl	: 	href,
+						item	:	text + ' - ' + title,
+						type	:	'link',
+						pageUrl	:	ctx.href,
+					});
+				}
+			}
+			//alert('POSTS: ' + posts.length);
+			if(posts.length > 1) {
+				return {
+					item	: ctx.title,
+					itemUrl : posts[0].itemUrl,
+					type	: 'photo',
+					posts	: posts,
+					window	: ctx.window,
+					description : 'index:[0-' + (posts.length -1) + ']',
+				}
+			}
+			else if(posts.length == 1) {
+				return posts[0];
+			}
+			else {
+				return {
+					type    : 'quote',
+					item    : ctx.title,
+					itemUrl : ctx.href,
+					body    : createFlavoredString(ctx.window.getSelection()),
+					bodyHtml : html,
+				}
+			}
+		},
+});
+
+
 update(Tombloo.Service, {
 	o_post	:	Tombloo.Service.post,
 	reprError : function(err){
