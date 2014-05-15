@@ -18,6 +18,32 @@ models.Tumblr.post = function(oldps){
 	});
 };
 
+models.Tumblr.postForm = function(fn){
+		var self = this;
+		var d = succeed();
+		d.addCallback(fn);
+		d.addCallback(function(res){
+			var url = res.channel.URI.asciiSpec;
+			switch(true){
+			case /dashboard/.test(url):
+				return;
+			
+			case /login/.test(url):
+				throw new Error(getMessage('error.notLoggedin'));
+			
+			default:
+				// このチェックをするためリダイレクトを弖う駅勣がある
+				// You've used 100% of your daily photo uploads. You can upload more tomorrow.
+				if(res.responseText.match('photo upload limit'))
+					throw new Error("You've exceeded your daily post limit.");
+				
+				var doc = convertToHTMLDocument(res.responseText);
+				throw new Error(convertToPlainText(doc.getElementsByClassName('errors')[0]));
+			}
+		});
+		return d;
+};
+
 //var TumblrQueue = update({},models.Tumblr);
 models.register(update(update({},models.Tumblr),
 	{

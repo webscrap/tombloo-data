@@ -266,7 +266,7 @@ Tombloo.Service.extractors.register({
 			ps.type = 'photo';
 			update(ps,this.imageToPost(images[0],ctx));
 			if(images.length > 1) {
-				ps.description = 'index:[0-' + (images.length -1) + ']';
+				ps.description = 'index:[1-' + (images.length) + ']';
 				ps.itemUrl = ps.itemUrl || this.ICON;
 				ps.posts = [];
 				ps.item = ctx.title;
@@ -361,7 +361,7 @@ Tombloo.Service.extractors.register({
 					type	: 'photo',
 					posts	: posts,
 					window	: ctx.window,
-					description : 'index:[0-' + (posts.length -1) + ']',
+					description : 'index:[1-' + (posts.length) + ']',
 				}
 			}
 			else if(posts.length == 1) {
@@ -504,7 +504,7 @@ update(Tombloo.Service, {
 						s = +m[1];
 						e = m[2];
 						if(e == '$') {
-							e = ps.posts.length - 1;
+							e = ps.posts.length;// - 1;
 						}
 						else {
 							e = +e;
@@ -522,7 +522,7 @@ update(Tombloo.Service, {
 						}
 					}
 					for(var a=s;a<=e;a++) {
-						posts.push(ps.posts[a]);
+						posts.push(ps.posts[a-1]);
 					}
 				}
 			}
