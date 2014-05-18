@@ -266,13 +266,23 @@ Tombloo.Service.extractors.register({
 			ps.type = 'photo';
 			update(ps,this.imageToPost(images[0],ctx));
 			if(images.length > 1) {
-				ps.description = 'index:[1-' + (images.length) + ']';
+				var selected = [];
 				ps.itemUrl = ps.itemUrl || this.ICON;
 				ps.posts = [];
 				ps.item = ctx.title;
 				ps.page = ctx.title;
 				for(var i=0;i<images.length;i++) {
+					var sel = images[i].getAttribute('selected') || '';
+					if(sel == '1') {
+						selected.push(i+1);
+					}
 					ps.posts.push(this.imageToPost(images[i],ctx));
+				}
+				if(selected && selected.length) {
+					ps.description = 'index:[' + joinText(selected,',') + ']';
+				}
+				else {
+					ps.description = 'index:[1-' + (images.length) + ']';
 				}
 			}
 		}
