@@ -66,14 +66,15 @@ models.register({
 				wb_image	: ps.itemUrl,
 				wb_url		: ps.pageUrl,
 				wb_org_desc	: '-',
-				wb_desc		: ps.item,
+				//wb_desc		: ps.item,
 				wb_title	: (ps.description ? ps.description + "\n\n" + tag_text : tag_text),
+				//wb_newpostboard :	'Enter a name for this postboard ',
 			});
 			return request(actionUrl,{
-				referrer	: data.wb_url,
-				headers		: {
-					'X-Requested-With' : 'XMLHttpRequest',
-				},
+				referrer	: self.SHARE_API,
+				// headers		: {
+					// 'X-Requested-With' : 'XMLHttpRequest',
+				// },
                 sendContent : data,
 			});
 		}
