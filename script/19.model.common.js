@@ -2,6 +2,37 @@ if(typeof(models)=='undefined')
 	models = new Repository();
 
 var xUtils = {
+	msgbox	   : function(doc,text,timeout) {
+			var target = doc || document || window.document;
+			if(!target) {
+				return false;
+			}
+			var msgId = 'tombloo_services_msgbox';
+			var msgbox = doc.getElementById(msgId);
+			text = '<font color="red">TOMBLOO: </font>' + text;
+			if(!msgbox) {
+				msgbox = doc.createElement('div');
+				msgbox.id = msgId;
+				msgbox.addEventListener('click',function(){this.style.display='none';});
+				msgbox.setAttribute('style',
+					'z-index: 32768; ' 
+					+'position: fixed; top: 20px;'
+					+'text-align:center;display: block; padding: 10px;'
+					+'background-color:#ee7;color:#000;opacity:0.8;'
+				);
+				target.body.appendChild(msgbox);
+			}
+			msgbox.innerHTML = text;
+			msgbox.style.display = 'block';
+			if(timeout) {
+				setTimeout(function(){
+					if(msgbox) {
+						msgbox.style.display = 'none';
+					}
+				},timeout);
+			}
+			return true;
+	},
 	escapeCode : function (text) {
 		var code = text.replace('\\','\\\\','g');
 		code = code.replace('"','\\"','g');
@@ -52,35 +83,35 @@ var xUtils = {
 	 * @return {String}      文字列としての値
 	 */
 	stringify :	function (x) {
-	    var result = '';
-        var c;
-	    if (x !== null) {
-	        switch (typeof x) {
-	            case 'string':
-	            case 'number':
-	            case 'xml':
-	                result = x;
-	                break;
-	            case 'boolean':
-	                result = x ? 1 : '';
-	                break;
-	            case 'object':
-	                if (x) {
-	                    c = x.constructor;
-	                    if (c === String || c === Number ||
-	                        (typeof XML !== 'undefined' && c === XML)
-	                    ) {
-	                        result = x;
-	                    } else if (c === Boolean) {
-	                        result = x ? 1 : '';
-	                    }
-	                }
-	                break;
-	            default:
-	                break;
-	        }
-	    }
-	    return result.toString();
+		var result = '';
+		var c;
+		if (x !== null) {
+			switch (typeof x) {
+				case 'string':
+				case 'number':
+				case 'xml':
+					result = x;
+					break;
+				case 'boolean':
+					result = x ? 1 : '';
+					break;
+				case 'object':
+					if (x) {
+						c = x.constructor;
+						if (c === String || c === Number ||
+							(typeof XML !== 'undefined' && c === XML)
+						) {
+							result = x;
+						} else if (c === Boolean) {
+							result = x ? 1 : '';
+						}
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		return result.toString();
 	}
 };
 
