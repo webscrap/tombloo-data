@@ -102,6 +102,8 @@ autoSaveId=5087813
 				throw new Error(data.msg || "Upload failed: No formkey.");
 			}
 			var actionUrl = 'http://www.diandian.com/draft/create';
+			//var actionUrl = 'http://www.diandian.com/dianlog/' + data.blogid + '/new/';//photo';
+			var timer = 0+1800000+(new Date()).getTime() + (ps.delayPost ? ps.delayPost*3 : 0);
 			var sendContent = {
 					formKey		: data.formkey,
 					title		: ps.item,
@@ -112,7 +114,8 @@ autoSaveId=5087813
 					shareSource	: ps.pageUrl,
 					privacy		: (ps['private'] || ps.adult) ? '2' : '0',
 					blogUrl		: data.blogid,
-					queue		: 'true',
+					//queue		: 'false',
+					timer		: timer,
 					syncToWeibo	: "false",
 					syncToQqWeibo	: "false",
 					syncToDouban	: "false",
@@ -126,6 +129,7 @@ autoSaveId=5087813
 				sendContent.link = ps.itemUrl;
 				sendContent.type = 'link';
 				sendContent.desc = ps.itemUrl + "\n" + sendContent.desc;
+				//actionUrl = actionUrl + 'link';
 			}
 			else if(ps.type == 'photo') {
 				if(!data.photo) {
@@ -133,6 +137,7 @@ autoSaveId=5087813
 				}
 				sendContent.photos = JSON.stringify([{id:data.photo,desc:ps.item}]);//'[{"id":"' + data.photo + '","desc":"' + ps.item + '"}]';
 				sendContent.type = 'photo';
+				//actionUrl = actionUrl + 'photo';
 			}
 			return request(actionUrl,{
 				referrer	: data.referer,
@@ -162,7 +167,7 @@ autoSaveId=5087813
 	checkPost : function(res,ps) {
 		var r = res.responseText;
 		var self = this;
-		if(r.match(/"errCode":\s*("0"|0)\s*,/)) {
+		if(r.match(/"errCode":\s*("0"|0)\s*/)) {
 			return succeed(res);
 		}
 		else if(ps.quiet) {
