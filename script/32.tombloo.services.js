@@ -78,6 +78,7 @@ Tombloo.Service.extractors.register({
 					type	: 'photo',
 					posts	: posts,
 					window	: ctx.window,
+					description : 'index:[1-' + posts.length + ']',
 				}
 			}
 			else {
@@ -420,12 +421,12 @@ update(Tombloo.Service, {
 		
 		return msg.join('\n');
 	},
-	delayPost : function(delay,ps,posters,doc,title) {
+	delayPost : function(delay,ps,posters,doc,msg) {
 		var self = this;
-		if(doc && title) {
+		ps.delayPost = delay;
+		if(doc && msg) {
 			setTimeout(function(){
-				doc.title = title;
-				log(title);
+				xUtils.msgbox(doc,msg);
 				self.o_post(ps,posters);
 			},delay);
 		}
@@ -445,6 +446,7 @@ update(Tombloo.Service, {
 		var delay = 0;
 		var doc = oldps.window ? oldps.window.document : null;
 		if(doc) {
+			
 			for(var i=0;i<count;i++) {
 				var ps = update({},oldps,posts[i]);
 				var msg = '[' + (i+1) + '/' + count + '] Posting ' + ps.item + "(" + ps.itemUrl + ") ...";
@@ -452,7 +454,7 @@ update(Tombloo.Service, {
 				delay += DELAY;
 			}
 			setTimeout(function(){
-				doc.title = oldps.item;
+				xUtils.msgbox(doc,'<font color="blue">' + count + ' items posted!</font>');
 			},delay);
 		}
 		else {
