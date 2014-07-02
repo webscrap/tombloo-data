@@ -445,24 +445,24 @@ update(Tombloo.Service, {
 		}
 		var delay = 0;
 		var doc = oldps.window ? oldps.window.document : null;
-		if(doc) {
+
 			
-			for(var i=0;i<count;i++) {
-				var ps = update({},oldps,posts[i]);
-				var msg = '[' + (i+1) + '/' + count + '] Posting ' + ps.item + "(" + ps.itemUrl + ") ...";
-				self.delayPost(delay,ps,posters,doc,msg);
-				delay += DELAY;
+		for(var i=0;i<count;i++) {
+			var ps = update({},oldps);
+			ps = update(ps,posts[i]);
+			var msg;
+			if(doc) {
+				msg = '[' + (i+1) + '/' + count + '] Posting ' + ps.item + "(" + ps.itemUrl + ") ...";
 			}
+			self.delayPost(delay,ps,posters,doc,msg);
+			delay += DELAY;
+		}
+		if(doc) {
 			setTimeout(function(){
 				xUtils.msgbox(doc,'<font color="blue">' + count + ' items posted!</font>');
 			},delay);
 		}
-		else {
-			for(var i=0;i<count;i++) {
-				self.delayPost(delay,update({},oldps,posts[i]),posters);	
-				delay += DELAY;
-			}
-		}
+
 		return succeed({});
 	},
 	postNext : function(oldps,posters,posts,idx,count) {
