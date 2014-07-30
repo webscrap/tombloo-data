@@ -35,7 +35,7 @@ models.register({
 		else if(r.match(/youdao\.com\/login/)) {
 			throw new Error("Post failed: User not login");
 		}
-		else if(ps.quiet) {
+		else if(!ps.quiet) {
 			throw new Error("Post failed:\n " + r);
 		}
 		else {

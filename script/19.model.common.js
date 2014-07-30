@@ -2,6 +2,160 @@ if(typeof(models)=='undefined')
 	models = new Repository();
 
 var xUtils = {
+	selectImages : function(callback) {
+		if (window.xuselectimages) return !1;
+		Array.indexOf || (Array.prototype.indexOf = function (e) {
+			for (var t = 0; this.length > t; t++)
+				if (this[t] == e) return t;
+			return -1
+		}), window.xuselectimages = !0, window.scrollTo(0, 0);
+		var e = document.getElementsByTagName("img"),
+			t = document.createElement("link");
+		if (t.href = "http://s1.pp.itc.cn/ux_cloud_atlas/js/modules/bookmark/css.css", t.rel = "stylesheet", t.type = "text/css", t.id = "BookmarkToolsJS", document.getElementsByTagName("HEAD").item(0).appendChild(t), 0 === e.length) {
+			var n = '<div class="bookmarkbg" ><div class="bookmarknav" ><div class="bookmarknophoto" ><a href="javascript:;" id="BookmarkExit" class="bookmarkexit" >退出</a>该页面没有适合收藏的图片,请试试其他页面吧！</div></div></div><div class="bookmarkshadelayer" style=""></div>',
+				i = document.createElement("div");
+			i.setAttribute("id", "bookmarktool"), i.innerHTML = n, document.body.appendChild(i);
+			var r = document.getElementById("BookmarkExit");
+			r.addEventListener ? r.addEventListener("click", function () {
+				document.body.removeChild(i)
+			}) : r.attachEvent && r.attachEvent("onclick", function () {
+				document.body.removeChild(i)
+			})
+		} else {
+			var o = document.createElement("div");
+			o.setAttribute("id", "bookmarktools_n_wrap");
+			var a = document.createElement("div");
+			a.setAttribute("id", "bookmarktools_i_container"), a.style.width = "100%";
+			var s = document.createElement("a");
+			s.setAttribute("id", "bookmarktools_j_"), s.setAttribute("href", "javascript:;"), s.setAttribute("class", "bookmarkexit"), s.className = "bookmarkexit";
+			var l = document.createElement("a");
+			l.setAttribute("id", "bookmarktools_l_"), l.setAttribute("href", "javascript:;"), l.setAttribute("class", "bookmarkrephoto"), l.className = "bookmarkrephoto";
+			var c = document.createElement("div");
+			c.setAttribute("id", "bookmarktools_k_");
+			var u = document.createElement("a");
+			u.setAttribute("id", "bookmarktools_p_"), u.setAttribute("class", "bookmarktools_opt"), u.className = "bookmarktools_opt", u.setAttribute("href", "javascript:;"), u.style.color = "#2E99E4", u.appendChild(document.createTextNode("选中全部图片"));
+			var d = document.createElement("a");
+			d.setAttribute("id", "bookmarktools_t_"), d.setAttribute("class", "bookmarktools_opt"), d.className = "bookmarktools_opt", d.setAttribute("href", "javascript:;"), d.style.color = "#2E99E4", d.style.display = "none", d.appendChild(document.createTextNode("反选全部图片"));
+			var p = document.body.clientWidth,
+				f = Math.floor((p - 200) / 232),
+				h = Math.floor((p - 232 * f) / 2),
+				m = document.createElement("div");
+			m.setAttribute("id", "bookmarktools_o_"), m.style.margin = "50px auto", m.style.padding = "0px " + h + "px";
+			var g = document.createElement("div");
+			g.setAttribute("id", "bookmarktools_g_");
+			var v = null,
+				y = null,
+				b = [],
+				x = {
+					overflow: "hidden",
+					padding: "5px",
+					margin: "10px",
+					width: "200px",
+					height: "200px",
+					display: "inline-block",
+					textAlign: "center",
+					border: "1px solid #fff",
+					borderRadius: "5px",
+					background: "#fff",
+					cssFloat: "left",
+					styleFloat: "left",
+					cursor: "pointer",
+					position: "relative"
+				},
+				w = {
+					overflow: "hidden",
+					display: "inline-block",
+					border: "6px solid orange",
+					padding: "4px",
+					marginBottom: "10px",
+					boxShadow: "2px 2px 0 #ff8b33",
+					borderRadius: "2px",
+					background: "#ff8b33",
+					lineHeight: "16px",
+					cssFloat: "right",
+					styleFloat: "right",
+					color: "#fff",
+					cursor: "pointer",
+					marginRight: "6px",
+					position: "relative"
+				},
+				k = function (e, t) {
+					for (var n in t) t.hasOwnProperty(n) && (e.style[n] = t[n])
+				},
+				C = function () {
+					var e = this.firstChild,
+						t = b.indexOf(e.src);
+					t >= 0 ? (b.splice(t, 1), this.style.background = "#fff") : (b.push(e.src), this.style.background = "#ff8b33")
+				},
+				v = function () {
+					if (0 === b.length) alert("请选择图片");
+					else {
+						return callback(b,document);	
+					}
+				},
+				T = function () {
+					document.body.removeChild(a), document.body.removeChild(o), window.xuselectimages = !1
+				};
+			u.onclick = function () {
+				for (var e = document.getElementById("bookmarktools_o_").getElementsByTagName("div"), t = 0; e.length > t; t++) {
+					0 != t && (e[t].style.backgroundColor = "#ff8b33");
+					for (var n = e[t].getElementsByTagName("img"), i = 0; n.length > i; i++) {
+						var r = n[i].getAttribute("src");
+						b.push(r)
+					}
+				}
+				document.getElementById("bookmarktools_p_").style.display = "none", document.getElementById("bookmarktools_t_").style.display = "inline-block"
+			}, d.onclick = function () {
+				for (var e = document.getElementById("bookmarktools_o_").getElementsByTagName("div"), t = 0; e.length > t; t++) 0 != t && (e[t].style.backgroundColor = "#FFFFFF"), b = [];
+				document.getElementById("bookmarktools_p_").style.display = "inline-block", document.getElementById("bookmarktools_t_").style.display = "none"
+			}, l.appendChild(document.createTextNode("转载到搜狐相册")), l.onclick = v, s.appendChild(document.createTextNode("退出")), s.onclick = T, g.appendChild(s), g.appendChild(l);
+			var _ = document.createElement("span");
+			_.setAttribute("class", "bookmarktips"), _.className = "bookmarktips", _.appendChild(document.createTextNode("选择您希望转载的图片到您的搜狐相册当中")), g.appendChild(_), g.appendChild(u), g.appendChild(d), m.appendChild(g);
+			for (var E = 1, S = 0, N = 0, A = e.length; A > N; N++) "none" == e[N].style.display || "hidden" == e[N].style.visibility || 0 === e[N].offsetWidth || 0 === e[N].offsetHeight || 200 > e[N].offsetWidth || 200 > e[N].offsetHeight || (S += 1, v = document.createElement("div"), k(v, x), y = new Image, y.src = e[N].src, v.onclick = C, y.onload = function () {
+				this.width > this.height ? this.width > 200 && (this.width = 200) : this.height > 200 && (this.height = 200), (this.naturalWidth && 200 > this.naturalWidth || this.naturalHeight && 200 > this.naturalHeight) && m.removeChild(this.parentNode)
+			}, v.className = "bookmarktools_img", v.appendChild(y), m.appendChild(v), k(o, {
+				zIndex: 12e7,
+				width: "10000px",
+				height: "10000px",
+				position: "fixed",
+				display: "block",
+				left: "0px",
+				top: "0px",
+				background: "#000",
+				opacity: .8,
+				filter: "alpha(opacity=80)"
+			}), k(a, {
+				zIndex: 13e7,
+				position: "absolute",
+				cssFloat: "right",
+				styleFloat: "right",
+				left: 0,
+				top: 0,
+				padding: "0px",
+				margin: "0px"
+			}), k(g, {
+				borderRadius: "5px",
+				background: "#fff",
+				height: "35px",
+				lineHeight: "38px",
+				padding: "15px",
+				margin: "13px",
+				font: "normal 14px/38px Helvetica,Arial,sans-serif"
+			}), k(c, w), document.body.appendChild(o), a.appendChild(m), document.body.appendChild(a));
+			if (E && 0 == S) {
+				E = 0;
+				var n = '<div class="bookmarkbg" ><div class="bookmarknav" ><div class="bookmarknophoto" ><a href="javascript:;" id="BookmarkExit" class="bookmarkexit" >退出</a>该页面没有适合收藏的图片,请试试其他页面吧！?</div></div></div><div class="bookmarkshadelayer" style=""></div>',
+					i = document.createElement("div");
+				i.setAttribute("id", "bookmarktool"), i.innerHTML = n, document.body.appendChild(i);
+				var r = document.getElementById("BookmarkExit");
+				r.addEventListener ? r.addEventListener("click", function () {
+					document.body.removeChild(i)
+				}) : r.attachEvent && r.attachEvent("onclick", function () {
+					document.body.removeChild(i)
+				})
+			}
+		}
+	},
 	msgbox	   : function(doc,text,timeout) {
 			var target = doc || document || window.document;
 			if(!target) {

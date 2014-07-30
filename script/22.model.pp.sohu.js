@@ -22,7 +22,7 @@ models.register({
 	post : function(oldps){
 		var ps = modelExt.createPost(oldps,'weheartit');
 		var self = this;
-		//modelExt.assertFalse(ps,{'adult':true,'private':true});
+		modelExt.assertFalse(ps,{'adult':true,'private':true});
 		var tags= ps.tags && ps.tags.length>0 ? "[#" + joinText(ps.tags, '#, #') + "#]" : ''; 
 		
 		//URL=http://pp.sohu.com/upload/remote
@@ -45,7 +45,7 @@ models.register({
 						folder_id	: data.id,
 						referer		: ps.pageUrl,
 						url			: ps.itemUrl,
-						desc		: joinText([ps.item,ps.description,tags],"\n"),		
+						desc		: joinText([ps.item,ps.description,tags,ps.pageUrl + '#photo-url:' + ps.itemUrl],"\n"),		
 		};
 		var HD = {
 			'X-Requested-With' : 'XMLHttpRequest',
