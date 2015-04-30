@@ -69,7 +69,7 @@ scope=0
 		return this.getid(ps).addCallback(function(data){
 			var actionUrl = self.UPLOAD_URI;
 			var SC = {
-							picture_name			: tags || (new Date()).toJSON(),
+							picture_name			: '',//tags || (new Date()).toJSON(),
 							'picture_src_list[]'	: ps.itemUrl,
 							bdstoken				: data.bdstoken,
 							surl					: ps.pageUrl,
@@ -80,14 +80,17 @@ scope=0
 				referrer	: ps.pageUrl,
 				sendContent	: SC,
 			}).addCallback(function(res){
-				var r = res.responseText;
-				var m = r.match(/"msg": "([^"]+)"/);
+				var r = res.channel.URI.asciiSpec;
+				var m = r.match(/&msg\s*=\s*([^&]+)/);
 				if(m) {
-					if(m[1] == "success uploaded") {
+					if(m[1] == "success") {
 					}
 					else {
 						throw new Error("Post error [" + m[1] + "]");
 					}
+				}
+				else {
+					throw new Error("Invalid response: " + r);
 				}
 			});
 		});

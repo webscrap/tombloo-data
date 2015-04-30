@@ -32,7 +32,7 @@ models.register({
 		}
 	},
 	post : function(oldps){
-		var ps = modelExt.createPost(oldps,"firefox");//,'tumblr-file');
+		var ps = modelExt.createPost(oldps,"links");//,'tumblr-file');
 		var self = this;
 		return self.share(ps).addCallback(
 			function(res) {

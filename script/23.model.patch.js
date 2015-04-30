@@ -7,7 +7,7 @@ update(models.GoogleBookmarks, {
 	},
 	
 	post : function(oldps){
-		var ps = modelExt.createPost(oldps,'firefox');
+		var ps = modelExt.createPost(oldps,'links');
 		return request(this.POST_URL, {
 			queryString : {
 				op     : 'edit',
@@ -69,6 +69,7 @@ update(models.WeHeartIt,{
 				title : ps.item,
 				media   : ps.itemUrl,
                 tags : joinText(ps.tags, ','),
+				set:	'25493571'
 			},
         });
 	},
@@ -85,7 +86,7 @@ update(models.WeHeartIt,{
 });
 
 ['HatenaBookmark'].forEach(function(name,idx){
-	modelExt.hookModel(name,'firefox',/photo|quote|link|video|regular/);
+	modelExt.hookModel(name,'links',/photo|quote|link|video|regular/);
 });
 
 update(models.Flickr,{

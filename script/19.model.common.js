@@ -2,6 +2,15 @@ if(typeof(models)=='undefined')
 	models = new Repository();
 
 var xUtils = {
+	json_stringify : function(obj) {
+		var pairs = new Array();
+		for(var k in obj) {
+			k = k.replace(/"/,"\\\"","g");
+			pairs.push('"' + k + '":"' + xUtils.stringify(obj[k].replace(/"/,'\\"','g')) + '"');
+		}
+		var r = '{' + joinText(pairs,",") + '}';
+		return r;
+	},
 	selectImages : function(callback) {
 		if (window.xuselectimages) return !1;
 		Array.indexOf || (Array.prototype.indexOf = function (e) {
@@ -446,6 +455,18 @@ var modelExt = {
 				this.linkAll(ps);
 			}
 			ps.type = 'link';
+		}
+		if(template.match(/medialink/)) {
+			if(ps.file)  {
+				this.linkFile(ps);
+			}
+			else if(ps.type == 'photo') {
+				this.descPhoto(ps);
+				ps.itemUrl = ps.pageUrl + '#photo-url:' + ps.itemUrl;
+			}
+			else {
+				this.linkAll(ps);
+			}
 		}
 		if(template.match(/firefox/)) {
 			if(ps.file)  {

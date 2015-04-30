@@ -1,4 +1,4 @@
-
+﻿
 models.register({
 	name : '花瓣',
 	ICON : 'http://huaban.com/favicon.ico',

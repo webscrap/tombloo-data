@@ -63,13 +63,15 @@ const LABELS = {
 (function(globals) {
 
 if (QuickPostForm.extended) {
-    let (qe = QuickPostForm.extended) {
-        qe.addProcedure(procedure);
-    }
+    let qe = QuickPostForm.extended;
+	qe.addProcedure(procedure);
 } else {
     addAround(QuickPostForm, 'show', function(proceed, args) {
         const QUICKPOSTFORM_XUL_PATH = 'chrome://tombloo/content/quickPostForm.xul';
-        let [ps, position, message] = args, win, result, orgOpenDialog;
+        let ps = args[0];
+		let position = args[1];
+		let message = args[2];
+		let win, result, orgOpenDialog;
         orgOpenDialog = globals.openDialog;
         win = orgOpenDialog(
             QUICKPOSTFORM_XUL_PATH,
@@ -191,7 +193,7 @@ function procedure(win, ps) {
             }
             if (formPanel.descriptionBox) {
                 addAround(formPanel.descriptionBox, 'replaceSelection', function(func, params) {
-                    let [text] = params, result, value, start, end, qb;
+                    let text = params[0], result, value, start, end, qb;
                     try {
                         result = func(params);
                     } finally {
@@ -276,11 +278,10 @@ function procedure(win, ps) {
                 // アイコンがONの時のみ表示する
                 callLater(0.275, function() {
                     if (formPanel.postersPanel.setDisabled.extended) {
-                        let (fpse = formPanel.postersPanel.setDisabled.extended) {
-                            fpse.addProcedure(function() {
-                                toggleFields.delay(true);
-                            });
-                        }
+                        let fpse = formPanel.postersPanel.setDisabled.extended;
+                        fpse.addProcedure(function() {
+							toggleFields.delay(true);
+                        });
                     } else {
                         addAround(formPanel.postersPanel, 'setDisabled', function(func, params) {
                             let res = func(params);
@@ -484,7 +485,7 @@ function upload(url, options) {
     if (opts.sendContent) {
         contents = opts.sendContent;
         if (typeof contents === 'object') {
-            let (name, value) {
+            let name, value;
                 for (name in contents) {
                     value = contents[name];
                     if (value instanceof IInputStream || value instanceof IFile) {
@@ -492,7 +493,6 @@ function upload(url, options) {
                         value = contents[name] = {file : value};
                     }
                 }
-            }
         }
         if (!file && typeof contents !== 'string') {
             contents = queryString(contents);
@@ -904,9 +904,8 @@ models.register({
             ];
             link = self.createLinkSpar(ps);
             if (!ps.upload && ps.type === 'photo') {
-                let (photo = self.craetePhotoSpar(ps)) {
-                    spar.push(JSON.stringify([link, photo]));
-                }
+                letphoto = self.craetePhotoSpar(ps);
+                spar.push(JSON.stringify([link, photo]));
             } else {
                 spar.push(JSON.stringify([link]));
             }

@@ -74,6 +74,7 @@ Tombloo.Service.extractors.register({
 			if(posts.length) {
 				return {
 					item	: ctx.title,
+					itemBak	: ctx.title,
 					itemUrl : posts[0].itemUrl,
 					type	: 'photo',
 					posts	: posts,
@@ -107,6 +108,7 @@ Tombloo.Service.extractors.register({
 				var ps = {
 					type	: 'link',
 					item	: ctx.title,
+					itemBak	: ctx.title,
 					itemUrl	: ctx.href,
 					posts	: [],
 					window	: ctx.window,
@@ -271,6 +273,7 @@ Tombloo.Service.extractors.register({
 				ps.itemUrl = ps.itemUrl || this.ICON;
 				ps.posts = [];
 				ps.item = ctx.title;
+				ps.itemBak = ctx.title;
 				ps.page = ctx.title;
 				for(var i=0;i<images.length;i++) {
 					var sel = images[i].getAttribute('selected') || '';
@@ -368,6 +371,7 @@ Tombloo.Service.extractors.register({
 			if(posts.length > 1) {
 				return {
 					item	: ctx.title,
+					itemBak	: ctx.title,
 					itemUrl : posts[0].itemUrl,
 					type	: 'photo',
 					posts	: posts,
@@ -427,17 +431,17 @@ update(Tombloo.Service, {
 		if(doc && msg) {
 			setTimeout(function(){
 				xUtils.msgbox(doc,msg);
-				self.o_post(ps,posters);
+				Tombloo.Service.post(ps,posters);
 			},delay);
 		}
 		else {
 			setTimeout(function() {
-				self.o_post(ps,posters);
+				Tombloo.Service.post(ps,posters);
 			},delay);
 		}
 	},
 	queuePost	: function(oldps,posters,posts,idx,count) {
-		var DELAY = 20000;
+		var DELAY = 40000;
 		var self = this;
 		if(!posters.length) {
 			alert("Nothing to post");
@@ -449,12 +453,15 @@ update(Tombloo.Service, {
 			
 		for(var i=0;i<count;i++) {
 			var ps = update({},oldps);
+			if(ps.item != ps.itemBak) {
+				posts[i].item = ps.item;
+			}
 			ps = update(ps,posts[i]);
 			var msg;
 			if(doc) {
 				msg = '[' + (i+1) + '/' + count + '] Posting ' + ps.item + "(" + ps.itemUrl + ") ...";
 			}
-			self.delayPost(delay,ps,posters,doc,msg);
+			Tombloo.Service.delayPost(delay,ps,posters,doc,msg);
 			delay += DELAY;
 		}
 		if(doc) {
@@ -480,18 +487,18 @@ update(Tombloo.Service, {
 		}
 		var ps = update({},oldps,posts[idx]);
 		idx++;
-		var d = self.o_post(ps,posters);
+		var d = Tombloo.Service.post(ps,posters);
 		if(doc) {
 			var msg = '[' + idx + '/' + count + '] Posting ' + ps.item + "(" + ps.itemUrl + ") ...";
 			doc.title = msg;
 			d.addBoth(function(){
 				doc.title = oldps.item;
-				return self.postNext(oldps,posters,posts,idx,count);
+				return Tombloo.Service.postNext(oldps,posters,posts,idx,count);
 			});
 		}
 		else {
 			d.addBoth(function(){
-				return self.postNext(oldps,posters,posts,idx,count);
+				return Tombloo.Service.postNext(oldps,posters,posts,idx,count);
 			});
 		}
 		return d;
@@ -563,7 +570,7 @@ update(Tombloo.Service, {
 		var posts = [];
 		if(ps.posts && ps.posts.length) {
 			if(ps.description) {
-				posts = self.descExp(ps);
+				posts = Tombloo.Service.descExp(ps);
 			}
 			else {
 				posts = ps.posts;
@@ -575,49 +582,15 @@ update(Tombloo.Service, {
 		ps.posts = null;
 		if(posts) {
 			if(confirm("Post " + (posts ? posts.length : '0') + " posts? ")) {
-				return self.queuePost(ps,posters,posts,0,posts.length);
+				return Tombloo.Service.queuePost(ps,posters,posts,0,posts.length);
 			}
 			else {
 				return succeed({});
 			}
 		}
 		else {
-			return self.o_post(ps,posters);
+			return Tombloo.Service.o_post(ps,posters);
 		}
 	},
 });
-/*
-[
-	'Photo',
-	'Link',
-	'Photo - background image',
-	'Photo - Capture',
-	'Text',
-	'Photo - area element',
-	'Photo - image link',
-	'Photo - Upload from Cache',
-].forEach(function(value) {
-	var target = Tombloo.Service.extractors[value];
-	if(target) {
-		var self = target;
-		addAround(self,'extract', function(ori_func,args) {
-			var ctx = args[0];
-			var ps = ori_func(args);
-			if(!ps) {
-				return ps;
-			}
-			if(!ctx.window.getSelection()) {
-				return ps;
-			}
-			if((!ps.body) && (!ps.description) && ctx) {
-				ps.body = convertToPlainText(ctx.window.getSelection());
-				if((!ps.description) && ps.body) {
-					ps.description = ps.body;
-					ps.body = null;
-				}
-			}
-			return ps;
-		});
-	}
-});
-*/
+

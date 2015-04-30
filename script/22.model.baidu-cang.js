@@ -9,7 +9,7 @@ models.register({
 	},
 	
 	post : function(oldps){
-		var ps = modelExt.createPost(oldps,'firefox');
+		var ps = modelExt.createPost(oldps,'medialink');
 	    var tag = joinText(ps.tags, ',');
         //tag = joinText(tag.split(/\s*,\s*/),',');
 		/*

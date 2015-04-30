@@ -11,7 +11,7 @@
 		},
 	});
 	models.register(ffmedia);
-	modelExt.hookModel('FirefoxMedia','firefox');
+	modelExt.hookModel('FirefoxMedia','medialink');
 
 	update(models.FirefoxBookmark,{
 		check	: function(ps) {

@@ -1,7 +1,7 @@
 
 models.register({
 	name : '百度云收藏',
-	ICON : 'http://s2.pan.bdstatic.com/res/static/images/favicon.ico',
+	ICON : 'http://pan.baidu.com/res/static/images/favicon.ico',
 	
 	check : function(ps){
 		return true;
@@ -85,7 +85,7 @@ models.register({
 								"title":ps.item,
 								"text":ps.description,
 								"res_src":null,
-								"content":getFlavor(ps.body, 'html'),
+								"content":(getFlavor(ps.body, 'html') || ''),
 								"type":"article",
 								"tags":ps.tags,
 							}],
@@ -105,9 +105,9 @@ models.register({
 							"records":[{
 								"url":ps.pageUrl,
 								"title":ps.item,
-								"text":ps.description,
+								"text":(ps.description || ''),
 								"res_src":null,
-								"content":'<p><a href="' + ps.pageUrl + '">' + ps.item + '</a><br /></p>' + getFlavor(ps.body,'html'),
+								"content":'<p><a href="' + ps.pageUrl + '">' + ps.item + '</a><br /></p>' + (getFlavor(ps.body,'html') || ''),
 								"type":"article",
 								"tags":ps.tags,
 							}],
