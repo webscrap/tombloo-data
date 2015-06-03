@@ -225,7 +225,59 @@ Tombloo.Service.extractors.register({
 });
 
 Tombloo.Service.extractors.register({
-	name : 'Photos - Images Miner',
+	name : 'Photos from Images Miner',
+	// ICON : 'http://userscripts.org/images/script_icon.png',
+	ICON :	'https://addons.cdn.mozilla.net/img/uploads/addon_icons/0/748-64.png',
+	check : function(ctx) {
+		//if(ctx.window.$myPlace.Cached.IMAGESMINER) return true;
+		//return false;
+		return ctx.window.document.getElementById("xz_imagesminer_data");//.childNodes.length;
+	},
+	extract : function(ctx) {
+		var ps = {
+			type	: 'link',
+			item	: ctx.title,
+			itemUrl	: ctx.href,
+			window	: ctx.window,
+			pageUrl : ctx.href,
+		};
+		//alert(ctx.window.$myPlace.Cached.IMAGESMINER);
+		var images = ctx.window.document.getElementById("xz_imagesminer_data").childNodes;
+		//var images = ctx.window.$myPlace.Cached.IMAGESMINER;
+		if(images && images.length) {
+			ps.type = 'photo';
+			update(ps,{itemUrl : resolveRelativePath(images[0].getAttribute('src'),ctx.href)});
+			if(images.length > 1) {
+				var selected = [];
+				ps.itemUrl = ps.itemUrl || this.ICON;
+				ps.posts = [];
+				ps.itemBak = ctx.title;
+				ps.page = ctx.title;
+				for(var i=0;i<images.length;i++) {
+					var sel = images[i].getAttribute('selected') || '';
+					if(sel == '1') {
+						selected.push(i+1);
+					}
+					ps.posts.push({
+						itemUrl : resolveRelativePath(images[i].getAttribute('src'),ctx.href),
+						item : ps.item,
+						pageUrl	: ps.pageUrl,
+					});
+				}
+				if(selected && selected.length) {
+					ps.description = 'index:[' + joinText(selected,',') + ']';
+				}
+				else {
+					ps.description = 'index:[1-' + (images.length) + ']';
+				}
+			}
+		}
+		return ps;
+	},
+});
+
+Tombloo.Service.extractors.register({
+	name : 'Elements from Images Miner',
 	// ICON : 'http://userscripts.org/images/script_icon.png',
 	ICON :	'https://addons.cdn.mozilla.net/img/uploads/addon_icons/0/748-64.png',
 	check : function(ctx) {
@@ -449,8 +501,7 @@ update(Tombloo.Service, {
 		}
 		var delay = 0;
 		var doc = oldps.window ? oldps.window.document : null;
-
-			
+	
 		for(var i=0;i<count;i++) {
 			var ps = update({},oldps);
 			if(ps.item != ps.itemBak) {
@@ -575,6 +626,9 @@ update(Tombloo.Service, {
 			else {
 				posts = ps.posts;
 			}
+			ps._multi_posts = 1;
+			ps._posts = posts;
+			ps._states = {};
 		}
 		else {
 			posts = null;

@@ -14,8 +14,8 @@ body {
 	vertical-align:middle;
 }
 .bm_from {
-	color: darkblue;
-	text-decoration: underline;
+	display:block;
+	margin:10px;
 }
 
 .bm_footer, .bm_head {

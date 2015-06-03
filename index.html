@@ -1,8 +1,8 @@
 <html><head>
 <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
 <script src='lib/ui.js'></script>
-<link rel=stylesheet type='text/css' href='lib/ui.css'>
 <script src='data/data.js'></script>
+<link rel=stylesheet type='text/css' href='lib/ui.css'>
 </head>
 
 <body>
@@ -11,6 +11,13 @@
 
 <div id="bm_head" class="bm_head">
 	<h1>MyPlace Bookmarks V1.0</h1>
+		<span>
+		<a href="javascript:load_oldder()">Oldder</a>
+		&nbsp;&nbsp;&nbsp;&nbsp;
+		<span id="bm_curpage1">CURPAGE</span>
+		&nbsp;&nbsp;&nbsp;&nbsp;
+		<a href="javascript:load_newer()">Newer</a>
+	</span>
 </div>
 
 <div id="bm_content" class="bm_content">
@@ -19,7 +26,7 @@
 	<span>
 		<a href="javascript:load_oldder()">Oldder</a>
 		&nbsp;&nbsp;&nbsp;&nbsp;
-		<span id="bm_curpage">CURPAGE</span>
+		<span id="bm_curpage2">CURPAGE</span>
 		&nbsp;&nbsp;&nbsp;&nbsp;
 		<a href="javascript:load_newer()">Newer</a>
 	</span>

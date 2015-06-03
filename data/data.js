@@ -6,3 +6,4 @@ DATA.push('201502');
 DATA.push('201503');
 DATA.push('201504');
 DATA.push('201505');
+DATA.push('201506');
